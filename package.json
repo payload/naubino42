@@ -1,0 +1,23 @@
+{
+  "name": "naubino42",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "npm run build-ts",
+    "build-ts": "tsc",
+    "watch": "npm run watch-ts",
+    "watch-ts": "tsc -w",
+    "start": "npm run build && npm run watch"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "matter-js": "*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "@types/node": "*",
+    "@types/matter-js": "*"
+  }
+}
