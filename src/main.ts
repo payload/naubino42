@@ -2,17 +2,44 @@ import Matter = require("matter-js")
 import { Vector } from "matter-js"
 import _ = require("lodash")
 
-class NaubJoint {
-
+function fail_condition(condition: boolean) {
+    const throw_error = true
+    if (throw_error && !condition) {
+        throw Error("fail_condition")
+    }
+    return !condition
 }
 
 class Naub {
-    naubino: any = null
-    pos: Vector = { x: 0, y: 0 }
-    radius: number = 1
+    _naubino: Naubino = null
+    _radius = 1
+    alive = true
+    naubs_joints = new Map<Naub, NaubJoint>()
+    body = Matter.Bodies.circle(0, 0, this._radius)
+
+    get pos() { return this.body.position }
+    get radius() { return this._radius }
+    get naubino() { return this._naubino }
+
+    set naubino(naubino) {
+        if (this._naubino === naubino) return
+        console.assert(!this._naubino) // could be removed with proper deregistration
+        this._naubino = naubino
+        if (naubino) {
+            Matter.World.add(this.naubino.engine.world, this.body)
+            naubino.add_naub(this)
+        }
+    }
 
     join_naub(other: Naub, joint: NaubJoint = null) {
+        if (fail_condition(this.alive && other.alive)) return
+        if (this.naubs_joints.has(other)) return
         console.log("Naub.join_naub")
+        if (joint == null) {
+            joint = this.naubino.create_naub_joint(this, other)
+        }
+        this.naubs_joints.set(other, joint)
+        other.join_naub(this, joint)
         /* python
         if fail_condition(self.alive and naub.alive): return
         if not joint:
@@ -24,10 +51,17 @@ class Naub {
     }
 }
 
+class NaubJoint {
+    naubino: any = null
+    constructor(naub_a: Naub, naub_b: Naub) {
+
+    }
+}
+
 class Naubino {
     size: Vector = { x: 1, y: 1 }
 
-    naubs: Naub[] = []
+    naubs = new Set<Naub>()
     pointers: Pointer[] = []
 
     engine: Matter.Engine = Matter.Engine.create()
@@ -36,9 +70,21 @@ class Naubino {
         return (a.radius + b.radius) * 2
     }
 
+    create_naub() {
+        let naub = new Naub()
+        naub.naubino = this
+        return naub
+    }
+
+    create_naub_joint(naub_a: Naub, naub_b: Naub) {
+        let joint = new NaubJoint(naub_a, naub_b)
+        joint.naubino = this
+        return joint
+    }
+
     create_naub_chain(n: number, chain_center: Vector, rot: number = 0): Naub[] {
         console.log("Naubino.create_naub_chain")
-        let naubs = _.times(n, () => { return new Naub() })
+        let naubs = _.times(n, () => { return this.create_naub() })
 
         // distance between each naub pair
         let rest_lens = []
@@ -88,9 +134,9 @@ class Naubino {
 
     add_naub(naub: Naub) {
         console.log("Naubino.add_naub")
-        if (naub.naubino === this) return
+        if (this.naubs.has(naub)) return
         naub.naubino = this
-        this.naubs.push(naub)
+        this.naubs.add(naub)
         // TODO mode.add_naub(naub), but do it with cb, different concept
         // TODO cb.add_naub(naub)
         /* python
@@ -143,7 +189,6 @@ function main() {
 
     let chain_a = naubino.create_naub_chain(100, { x: 0, y: -10 })
     let chain_b = naubino.create_naub_chain(100, { x: 0, y: 10 })
-    console.log(chain_a)
     /* python
     chain_a         = naubino.create_naub_chain(100, (0, -10))
     chain_b         = naubino.create_naub_chain(100, (0,  10))
@@ -152,7 +197,9 @@ function main() {
     for (let naub of chain_naubs) {
         naubino.add_naub(naub)
     }
+    console.assert(naubino.naubs.size == 200)
     naubino.step(0.0166)
+    console.assert(naubino.engine.world.bodies.length >= 200)
     /* python
     for naub in chain_a + chain_b:
         naubino.add_naub(naub)
@@ -169,7 +216,7 @@ function main() {
         hunters = hunters.filter((hunter) => { return hunter.step() })
         naubino.step(0.0166)
     }
-    console.assert(naubino.naubs.length == 0, "naubs == 0")
+    console.assert(naubino.naubs.size == 0, "naubs == 0")
     console.assert(naubino.pointers.length == 0, "pointers == 0")
     /* python
     hunters         = [hunter_0, hunter_1]
