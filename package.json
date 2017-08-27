@@ -13,11 +13,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "matter-js": "*"
+    "matter-js": "*",
+    "lodash": "*"
   },
   "devDependencies": {
     "typescript": "*",
     "@types/node": "*",
-    "@types/matter-js": "*"
+    "@types/matter-js": "*",
+    "@types/lodash": "*"
   }
 }
