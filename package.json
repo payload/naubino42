@@ -17,9 +17,11 @@
     "lodash": "*"
   },
   "devDependencies": {
+    "mocha": "*",
     "typescript": "*",
     "@types/node": "*",
     "@types/matter-js": "*",
+    "@types/mocha": "*",
     "@types/lodash": "*"
   }
 }
