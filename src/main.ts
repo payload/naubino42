@@ -10,17 +10,24 @@ function fail_condition(condition: boolean) {
     return !condition
 }
 
+function naub_joint_rest_length(a: Naub, b: Naub) {
+    return (a.radius + b.radius) * 2
+}
+
 class Naub {
     _naubino: Naubino = null
     _radius = 1
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
     body = Matter.Bodies.circle(0, 0, this._radius)
+    color = "red"
 
     get pos() { return this.body.position }
-    get radius() { return this._radius }
-    get naubino() { return this._naubino }
+    set pos(pos) { Matter.Body.setPosition(this.body, pos) }
 
+    get radius() { return this._radius }
+
+    get naubino() { return this._naubino }
     set naubino(naubino) {
         if (this._naubino === naubino) return
         console.assert(!this._naubino) // could be removed with proper deregistration
@@ -49,12 +56,95 @@ class Naub {
             naub.join_naub(self, joint)
         */
     }
+
+    // like pynaubino good_merge_naub
+    merges_with(naub: Naub) {
+        const alive = this.alive
+        const joker = this.naubs_joints.size == 0
+        const colors_alike = this.color == naub.color
+        const naub_is_far = !this.is_naub_near(naub)
+        return alive && (joker || (colors_alike && naub_is_far))
+    }
+
+    is_naub_near(naub: Naub) {
+        if (this.naubs_joints.has(naub)) return true
+        for (let neighbor of this.naubs_joints.keys()) {
+            if (neighbor.naubs_joints.has(naub)) return true
+        }
+        return false
+    }
 }
 
 class NaubJoint {
-    naubino: any = null
-    constructor(naub_a: Naub, naub_b: Naub) {
+    _naubino: any = null
+    _constraint: Matter.Constraint
 
+    constructor(naub_a: Naub, naub_b: Naub) {
+        this._constraint = Matter.Constraint.create({
+            bodyA: naub_a.body,
+            bodyB: naub_b.body,
+            //stiffness: 2,
+            //damping: 0.1,
+            length: naub_joint_rest_length(naub_a, naub_b)
+        })
+    }
+
+    get naubino() { return this._naubino }
+    set naubino(naubino) {
+        if (this._naubino === naubino) return
+        console.assert(!this._naubino) // could be removed with proper deregistration
+        this._naubino = naubino
+        if (naubino) {
+            Matter.World.add(this.naubino.engine.world, this._constraint)
+            naubino.add_naub_joint(this)
+        }
+    }
+}
+
+class Hunter {
+    _naubino: Naubino
+    _naub_a: Naub
+    _naub_b: Naub
+    _touch: Pointer
+    _force = _.random(8, 12)
+    finished = false
+
+    constructor(naubino: Naubino, naub_a: Naub, naub_b: Naub) {
+        this._naubino = naubino
+        this._naub_a = naub_a
+        this._naub_b = naub_b
+        this._touch = naubino.touch_down(naub_a.pos)
+        console.assert(this._naubino)
+        console.assert(this._naub_a)
+        console.assert(this._naub_b)
+        console.assert(this._touch)
+    }
+
+    step() {
+        // TODO this.finished could be a cb or promise
+        const { _touch, _naub_a, _naub_b } = this
+        if (this.finished) {
+            return // already finished
+        }
+        if (!_touch) {
+            this.finished = true
+            return // no touch
+        }
+        if (!_naub_a.alive) {
+            _touch.up()
+            this.finished = true
+            return // naub_a not alive
+        }
+        if (!_naub_a.merges_with(_naub_b)) {
+            _touch.up()
+            this.finished = true
+            return // naub_a doesn't merge with naub_b
+        }
+        const a = _naub_a.pos
+        const b = _naub_b.pos
+        const direction = Vector.normalise(Vector.sub(b, a))
+        const forward = Vector.mult(direction, this._force)
+        _touch.move(forward)
     }
 }
 
@@ -62,13 +152,11 @@ class Naubino {
     size: Vector = { x: 1, y: 1 }
 
     naubs = new Set<Naub>()
-    pointers: Pointer[] = []
+    naub_joints = new Set<NaubJoint>()
+    pointers = new Set<Pointer>()
+    map_naub_pointer = new Map<Naub, Pointer>();
 
     engine: Matter.Engine = Matter.Engine.create()
-
-    naub_joint_rest_length(a: Naub, b: Naub) {
-        return (a.radius + b.radius) * 2
-    }
 
     create_naub() {
         let naub = new Naub()
@@ -82,6 +170,12 @@ class Naubino {
         return joint
     }
 
+    create_pointer(pos: Vector) {
+        let pointer = new Pointer(pos)
+        this.pointers.add(pointer)
+        return pointer
+    }
+
     create_naub_chain(n: number, chain_center: Vector, rot: number = 0): Naub[] {
         console.log("Naubino.create_naub_chain")
         let naubs = _.times(n, () => { return this.create_naub() })
@@ -89,7 +183,7 @@ class Naubino {
         // distance between each naub pair
         let rest_lens = []
         for (let i = 0; i < naubs.length - 1; ++i) {
-            const rest_len = this.naub_joint_rest_length(naubs[i], naubs[i + 1])
+            const rest_len = naub_joint_rest_length(naubs[i], naubs[i + 1])
             rest_lens.push(rest_len)
         }
 
@@ -108,7 +202,7 @@ class Naubino {
 
         // apply position together with chain_center to naubs
         _.forEach(naubs, (naub, i) => {
-            Vector.add(chain_center, positions[i], naub.pos)
+            naub.pos = Vector.add(chain_center, positions[i])
         })
 
         // join naubs
@@ -151,9 +245,58 @@ class Naubino {
         */
     }
 
-    step(dt: number) {
-        console.log("Naubino.step")
-        Matter.Engine.update(this.engine, dt)
+    add_naub_joint(joint: NaubJoint) {
+        this.naub_joints.add(joint)
+    }
+
+    // like pynaubino Naubino.touch_down
+    touch_down(pos: Vector) {
+        const naub = this.find_naub(pos)
+        if (naub) {
+            return this.connect_pointer_naub(naub)
+        }
+        return null
+    }
+
+    find_naub(pos: Vector): Naub {
+        const hits = Matter.Query.point(this.engine.world.bodies, pos)
+        for (const body of hits) {
+            for (const naub of this.naubs) {
+                if (naub.body == body) return naub
+            }
+        }
+        return null
+    }
+
+    // like pynaubino Naub.select
+    connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
+        console.log("connect_pointer_naub")
+        console.assert(naub.alive)
+        if (!pos) pos = _.clone(naub.pos)
+        if (!pointer) pointer = this.create_pointer(pos)
+        console.assert(this.map_naub_pointer.get(naub) != pointer)
+        pointer.constraint = Matter.Constraint.create({
+            bodyA: pointer.body,
+            bodyB: naub.body,
+            pointB: Matter.Vector.sub(pointer.pos, naub.body.position),
+            length: 2
+        })
+        Matter.World.add(this.engine.world, pointer.constraint)
+        this.map_naub_pointer.set(naub, pointer)
+        return pointer
+    }
+
+    step() {
+        //console.log("Naubino.step")
+        for (const pointer of this.pointers) {
+            pointer.step()
+        }
+
+        Matter.Engine.update(this.engine)
+
+        const bodies = this.engine.world.bodies
+        const speed = _.sumBy(bodies, (body) => { return body.speed }) / bodies.length
+        //console.log("world speed", speed)
         /* python
         for pointer in self.pointers:
             pointer.step(dt)
@@ -170,20 +313,98 @@ class Naubino {
     }
 }
 
+function Vector_interpolate_to(a: Vector, b: Vector, ratio: number, out?: Vector) {
+    const diff = Matter.Vector.sub(b, a)
+    const norm = Matter.Vector.normalise(diff)
+    const forward = Matter.Vector.mult(norm, ratio)
+    return Matter.Vector.add(a, forward, out)
+}
+
 class Pointer {
 
-}
+    body = Matter.Body.create({})
+    pos: Vector
+    constraint: Matter.Constraint
 
-class Hunter {
-    constructor(naubino: Naubino, a: Naub, b: Naub) {
-        console.log("Hunter.constructor")
+    constructor(pos: Vector) {
+        Matter.Body.setStatic(this.body, true)
+        Matter.Body.setPosition(this.body, pos)
+        this.pos = pos
     }
+
+    up() {
+
+    }
+
+    move(to_move: Vector) {
+        Vector.add(this.pos, to_move, this.pos)
+    }
+
     step() {
-        console.log("Hunter.step")
+        const body_pos = Vector_interpolate_to(this.body.position, this.pos, 0.25)
+        this.body.velocity = Matter.Vector.sub(body_pos, this.body.position)
+        this.body.position = body_pos
     }
 }
 
-function main() {
+function test_pointer_moves() {
+    console.log("test_pointer_moves")
+    const pointer = new Pointer({ x: 0, y: 0 })
+    pointer.pos = { x: 10, y: 0 }
+    pointer.step()
+    console.assert(pointer.body.position.x > 0)
+}
+
+function test_naubino_find_naub() {
+    console.log("test_naubino_find_naub")
+    const naubino = new Naubino()
+    naubino.size = { x: 200, y: 200 }
+    const naub_a = naubino.create_naub()
+    naub_a.pos = { x: 10, y: 10 }
+    const naub_b = naubino.create_naub()
+    naub_b.pos = { x: -10, y: -10 }
+    const naub = naubino.find_naub(naub_a.pos)
+    console.assert(naub == naub_a)
+}
+
+function test_naubino_connect_pointer_naub_moves_naub() {
+    console.log("test_naubino_connect_pointer_naub_moves_naub")
+    const naubino = new Naubino()
+    naubino.size = { x: 200, y: 200 }
+    const naub = naubino.create_naub()
+    naub.pos = { x: 10, y: 10 }
+    const pointer = naubino.connect_pointer_naub(naub)
+    pointer.pos.x += 10
+    // first, naub bounces back. the pointer constraint moves not good
+    for (let i = 0; i < 10; i++) {
+        pointer.step()
+        naubino.step()
+        console.log("naub.pos.x", naub.pos.x)
+    }
+    console.assert(naub.pos.x > 10)
+}
+
+function test_hunter_moves_naub() {
+    console.log("test_hunter_moves_naub")
+    const naubino = new Naubino()
+    naubino.size = { x: 200, y: 200 }
+    const naub_a = naubino.create_naub();
+    naub_a.pos = { x: -10, y: 0 }
+    const naub_b = naubino.create_naub();
+    naub_b.pos = { x: 0, y: 0 }
+    console.assert(naubino.naubs.size == 2)
+    const hunter = new Hunter(naubino, naub_a, naub_b)
+    // TODO bounce back undesired (naub_a.pos.x < -10)
+    // TODO sometimes doesn't move right
+    for (let i = 0; i < 10; i++) {
+        hunter.step()
+        naubino.step()
+        console.log("naub_a.pos.x", naub_a.pos.x, hunter._touch.pos.x)
+    }
+    console.assert(naub_a.pos.x > -10)
+}
+
+function test_200naubs() {
     let naubino = new Naubino()
     naubino.size = { x: 200, y: 200 }
 
@@ -198,7 +419,7 @@ function main() {
         naubino.add_naub(naub)
     }
     console.assert(naubino.naubs.size == 200)
-    naubino.step(0.0166)
+    naubino.step()
     console.assert(naubino.engine.world.bodies.length >= 200)
     /* python
     for naub in chain_a + chain_b:
@@ -211,13 +432,17 @@ function main() {
     hunter_0        = autoplay.Hunter(naubino, chain_a[ 0], chain_b[ 0])
     hunter_1        = autoplay.Hunter(naubino, chain_a[-1], chain_b[-1])
     */
+    console.log("hunting")
     let hunters = [hunter_0, hunter_1]
-    for (let i = 0; i < 100 && hunters; ++i) {
-        hunters = hunters.filter((hunter) => { return hunter.step() })
-        naubino.step(0.0166)
+    for (let i = 0; i < 10 && hunters.length > 0; ++i) {
+        hunters = hunters.filter((hunter) => {
+            hunter.step()
+            return !hunter.finished
+        })
+        naubino.step()
     }
     console.assert(naubino.naubs.size == 0, "naubs == 0")
-    console.assert(naubino.pointers.length == 0, "pointers == 0")
+    console.assert(naubino.pointers.size == 0, "pointers == 0")
     /* python
     hunters         = [hunter_0, hunter_1]
     while hunters:
@@ -228,6 +453,14 @@ function main() {
     assert not naubino.naubs
     assert not naubino.pointers
     */
+}
+
+function main() {
+    test_pointer_moves();
+    test_naubino_find_naub();
+    test_naubino_connect_pointer_naub_moves_naub()
+    test_hunter_moves_naub();
+    //test_200naubs();
 }
 
 main()
