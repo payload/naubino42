@@ -1,6 +1,7 @@
 import Matter = require("matter-js")
 import { Vector } from "matter-js"
 import _ = require("lodash")
+//import { describe, it } = require("mocha")
 
 function fail_condition(condition: boolean) {
     const throw_error = true
@@ -41,7 +42,7 @@ class Naub {
     join_naub(other: Naub, joint: NaubJoint = null) {
         if (fail_condition(this.alive && other.alive)) return
         if (this.naubs_joints.has(other)) return
-        console.log("Naub.join_naub")
+        //console.log("Naub.join_naub")
         if (joint == null) {
             joint = this.naubino.create_naub_joint(this, other)
         }
@@ -177,7 +178,7 @@ class Naubino {
     }
 
     create_naub_chain(n: number, chain_center: Vector, rot: number = 0): Naub[] {
-        console.log("Naubino.create_naub_chain")
+        //console.log("Naubino.create_naub_chain")
         let naubs = _.times(n, () => { return this.create_naub() })
 
         // distance between each naub pair
@@ -227,7 +228,7 @@ class Naubino {
     }
 
     add_naub(naub: Naub) {
-        console.log("Naubino.add_naub")
+        //console.log("Naubino.add_naub")
         if (this.naubs.has(naub)) return
         naub.naubino = this
         this.naubs.add(naub)
@@ -270,7 +271,7 @@ class Naubino {
 
     // like pynaubino Naub.select
     connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
-        console.log("connect_pointer_naub")
+        //console.log("connect_pointer_naub")
         console.assert(naub.alive)
         if (!pos) pos = _.clone(naub.pos)
         if (!pointer) pointer = this.create_pointer(pos)
@@ -347,63 +348,6 @@ class Pointer {
     }
 }
 
-function test_pointer_moves() {
-    console.log("test_pointer_moves")
-    const pointer = new Pointer({ x: 0, y: 0 })
-    pointer.pos = { x: 10, y: 0 }
-    pointer.step()
-    console.assert(pointer.body.position.x > 0)
-}
-
-function test_naubino_find_naub() {
-    console.log("test_naubino_find_naub")
-    const naubino = new Naubino()
-    naubino.size = { x: 200, y: 200 }
-    const naub_a = naubino.create_naub()
-    naub_a.pos = { x: 10, y: 10 }
-    const naub_b = naubino.create_naub()
-    naub_b.pos = { x: -10, y: -10 }
-    const naub = naubino.find_naub(naub_a.pos)
-    console.assert(naub == naub_a)
-}
-
-function test_naubino_connect_pointer_naub_moves_naub() {
-    console.log("test_naubino_connect_pointer_naub_moves_naub")
-    const naubino = new Naubino()
-    naubino.size = { x: 200, y: 200 }
-    const naub = naubino.create_naub()
-    naub.pos = { x: 10, y: 10 }
-    const pointer = naubino.connect_pointer_naub(naub)
-    pointer.pos.x += 10
-    // first, naub bounces back. the pointer constraint moves not good
-    for (let i = 0; i < 10; i++) {
-        pointer.step()
-        naubino.step()
-        console.log("naub.pos.x", naub.pos.x)
-    }
-    console.assert(naub.pos.x > 10)
-}
-
-function test_hunter_moves_naub() {
-    console.log("test_hunter_moves_naub")
-    const naubino = new Naubino()
-    naubino.size = { x: 200, y: 200 }
-    const naub_a = naubino.create_naub();
-    naub_a.pos = { x: -10, y: 0 }
-    const naub_b = naubino.create_naub();
-    naub_b.pos = { x: 0, y: 0 }
-    console.assert(naubino.naubs.size == 2)
-    const hunter = new Hunter(naubino, naub_a, naub_b)
-    // TODO bounce back undesired (naub_a.pos.x < -10)
-    // TODO sometimes doesn't move right
-    for (let i = 0; i < 10; i++) {
-        hunter.step()
-        naubino.step()
-        console.log("naub_a.pos.x", naub_a.pos.x, hunter._touch.pos.x)
-    }
-    console.assert(naub_a.pos.x > -10)
-}
-
 function test_200naubs() {
     let naubino = new Naubino()
     naubino.size = { x: 200, y: 200 }
@@ -432,7 +376,7 @@ function test_200naubs() {
     hunter_0        = autoplay.Hunter(naubino, chain_a[ 0], chain_b[ 0])
     hunter_1        = autoplay.Hunter(naubino, chain_a[-1], chain_b[-1])
     */
-    console.log("hunting")
+    //console.log("hunting")
     let hunters = [hunter_0, hunter_1]
     for (let i = 0; i < 10 && hunters.length > 0; ++i) {
         hunters = hunters.filter((hunter) => {
@@ -455,12 +399,117 @@ function test_200naubs() {
     */
 }
 
-function main() {
-    test_pointer_moves();
-    test_naubino_find_naub();
-    test_naubino_connect_pointer_naub_moves_naub()
-    test_hunter_moves_naub();
-    //test_200naubs();
-}
+describe("pointer", () => {
+    it("moves", () => {
+        const pointer = new Pointer({ x: 0, y: 0 })
+        pointer.pos = { x: 10, y: 0 }
+        pointer.step()
+        console.assert(pointer.body.position.x > 0)
+    })
+})
 
-main()
+describe("naubino", () => {
+    let naubino : Naubino;
+
+    beforeEach(function() {
+        naubino = new Naubino()
+        naubino.size = { x: 200, y: 200 }
+    })
+
+    it("finds naub", () => {
+        const naub_a = naubino.create_naub()
+        naub_a.pos = { x: 10, y: 10 }
+        const naub_b = naubino.create_naub()
+        naub_b.pos = { x: -10, y: -10 }
+        const naub = naubino.find_naub(naub_a.pos)
+        console.assert(naub == naub_a)
+    })
+
+    it("connects naub with pointer and moves naub", () => {
+        const naub = naubino.create_naub()
+        naub.pos = { x: 10, y: 10 }
+        const pointer = naubino.connect_pointer_naub(naub)
+        pointer.pos.x += 10
+        // TODO first, naub bounces back. the pointer constraint moves not good
+        for (let i = 0; i < 10; i++) {
+            pointer.step()
+            naubino.step()
+            //console.log("naub.pos.x", naub.pos.x)
+        }
+        console.assert(naub.pos.x > 10)
+    })
+
+    it("some 200 naubs", () => {
+        let chain_a = naubino.create_naub_chain(100, { x: 0, y: -10 })
+        let chain_b = naubino.create_naub_chain(100, { x: 0, y: 10 })
+        /* python
+        chain_a         = naubino.create_naub_chain(100, (0, -10))
+        chain_b         = naubino.create_naub_chain(100, (0,  10))
+        */
+        let chain_naubs = chain_a.concat(chain_b)
+        for (let naub of chain_naubs) {
+            naubino.add_naub(naub)
+        }
+        console.assert(naubino.naubs.size == 200)
+        naubino.step()
+        console.assert(naubino.engine.world.bodies.length >= 200)
+        /* python
+        for naub in chain_a + chain_b:
+            naubino.add_naub(naub)
+        naubino.step(0.0166)
+        */
+        let hunter_0 = new Hunter(naubino, chain_a[0], chain_b[0])
+        let hunter_1 = new Hunter(naubino, chain_a[chain_a.length - 1], chain_b[chain_b.length - 1])
+        /* python
+        hunter_0        = autoplay.Hunter(naubino, chain_a[ 0], chain_b[ 0])
+        hunter_1        = autoplay.Hunter(naubino, chain_a[-1], chain_b[-1])
+        */
+        //console.log("hunting")
+        let hunters = [hunter_0, hunter_1]
+        for (let i = 0; i < 10 && hunters.length > 0; ++i) {
+            hunters = hunters.filter((hunter) => {
+                hunter.step()
+                return !hunter.finished
+            })
+            naubino.step()
+        }
+        console.assert(naubino.naubs.size == 0, "naubs == 0")
+        console.assert(naubino.pointers.size == 0, "pointers == 0")
+        /* python
+        hunters         = [hunter_0, hunter_1]
+        while hunters:
+            for h in hunters[:]:
+                if not h.step():
+                    hunters.remove(h)
+            naubino.step(0.0166)
+        assert not naubino.naubs
+        assert not naubino.pointers
+        */
+    })
+})
+
+describe("hunter", () => {
+    let naubino : Naubino;
+    
+    beforeEach(function() {
+        naubino = new Naubino()
+        naubino.size = { x: 200, y: 200 }
+    })
+
+    it("moves naub", () => {
+        const naub_a = naubino.create_naub();
+        naub_a.pos = { x: -10, y: 0 }
+        const naub_b = naubino.create_naub();
+        naub_b.pos = { x: 0, y: 0 }
+        console.assert(naubino.naubs.size == 2)
+        const hunter = new Hunter(naubino, naub_a, naub_b)
+        // TODO bounce back undesired (naub_a.pos.x < -10)
+        // TODO sometimes doesn't move right
+        for (let i = 0; i < 10; i++) {
+            hunter.step()
+            naubino.step()
+            //console.log("naub_a.pos.x", naub_a.pos.x, hunter._touch.pos.x)
+        }
+        console.assert(naub_a.pos.x > -10)
+    })
+})
