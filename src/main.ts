@@ -1,7 +1,7 @@
 import Matter = require("matter-js")
 import { Vector } from "matter-js"
 import _ = require("lodash")
-//import { describe, it } = require("mocha")
+import { assert } from "chai"
 
 function fail_condition(condition: boolean) {
     const throw_error = true
@@ -177,7 +177,7 @@ class Naubino {
         return pointer
     }
 
-    create_naub_chain(n: number, chain_center: Vector, rot: number = 0): Naub[] {
+    create_naub_chain(n: number, chain_center: Vector = { x: 0, y: 0 }, rot: number = 0): Naub[] {
         //console.log("Naubino.create_naub_chain")
         let naubs = _.times(n, () => { return this.create_naub() })
 
@@ -409,9 +409,9 @@ describe("pointer", () => {
 })
 
 describe("naubino", () => {
-    let naubino : Naubino;
+    let naubino: Naubino;
 
-    beforeEach(function() {
+    beforeEach(function () {
         naubino = new Naubino()
         naubino.size = { x: 200, y: 200 }
     })
@@ -439,7 +439,37 @@ describe("naubino", () => {
         console.assert(naub.pos.x > 10)
     })
 
-    it("some 200 naubs", () => {
+    describe("create_naub_chain", function () {
+        it("creates naubs and joints", () => {
+            const chain = naubino.create_naub_chain(10);
+            console.assert(naubino.naubs.size == 10)
+            console.assert(naubino.naub_joints.size == 9)
+        })
+        it("creates naubs around 0x0 horizontally", () => {
+            const chain = naubino.create_naub_chain(11);
+            const left = _.filter(chain, (naub) => naub.pos.x < 0).length
+            const right = _.filter(chain, (naub) => naub.pos.x > 0).length
+            console.assert(left == 5, "left == 5")
+            console.assert(right == 5, "right == 5")
+        })
+        it("creates naubs around 0x0 vertically when rotated 90°", () => {
+            const chain = naubino.create_naub_chain(11, { x: 0, y: 0 }, 0.5 * Math.PI);
+            const above = _.filter(chain, (naub) => naub.pos.y < 0).length
+            const below = _.filter(chain, (naub) => naub.pos.y > 0).length
+            console.assert(above == 5, "above == 5")
+            console.assert(below == 5, "below == 5")
+        })
+        it("creates naubs around -10x-10 vertically when rotated 90°", () => {
+            const chain = naubino.create_naub_chain(11, { x: 10, y: -10 }, 0.5 * Math.PI);
+            const above = _.filter(chain, (naub) => naub.pos.y < -10).length
+            const below = _.filter(chain, (naub) => naub.pos.y > -10).length
+            console.assert(above == 5, "above == 5")
+            console.assert(below == 5, "below == 5")
+            _.every(chain, (naub) => assert.closeTo(naub.pos.x, 10, 0.0001))
+        })
+    })
+
+    it("connecting naub chains with hunters leaves nothing behind", () => {
         let chain_a = naubino.create_naub_chain(100, { x: 0, y: -10 })
         let chain_b = naubino.create_naub_chain(100, { x: 0, y: 10 })
         /* python
@@ -473,8 +503,8 @@ describe("naubino", () => {
             })
             naubino.step()
         }
-        console.assert(naubino.naubs.size == 0, "naubs == 0")
-        console.assert(naubino.pointers.size == 0, "pointers == 0")
+        console.assert(naubino.naubs.size == 0, "postcondition: naubs == 0")
+        console.assert(naubino.pointers.size == 0, "postcondition: pointers == 0")
         /* python
         hunters         = [hunter_0, hunter_1]
         while hunters:
@@ -489,9 +519,9 @@ describe("naubino", () => {
 })
 
 describe("hunter", () => {
-    let naubino : Naubino;
-    
-    beforeEach(function() {
+    let naubino: Naubino;
+
+    beforeEach(function () {
         naubino = new Naubino()
         naubino.size = { x: 200, y: 200 }
     })
