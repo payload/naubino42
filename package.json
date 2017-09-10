@@ -17,8 +17,10 @@
     "lodash": "*"
   },
   "devDependencies": {
+    "chai": "*",
     "mocha": "*",
     "typescript": "*",
+    "@types/chai": "*",
     "@types/node": "*",
     "@types/matter-js": "*",
     "@types/mocha": "*",
