@@ -439,7 +439,12 @@ describe("Naubino", () => {
     })
 
     describe("merge_naubs", function () {
-        it("connects two single naubs")
+        it("connects two single naubs", function () {
+            const naub_a = naubino.create_naub();
+            const naub_b = naubino.create_naub();
+            naubino.merge_naubs(naub_a, naub_b);
+            assert.isTrue(naub_a.is_connected(naub_b))
+        })
         it("connects single naub with naub pair")
         it("connects two naub pairs to a chain")
         it("connects two naub pairs and merges naub_a")
