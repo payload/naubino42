@@ -409,20 +409,34 @@ describe("Pointer", () => {
 })
 
 describe("Naubino", () => {
-    let naubino: Naubino;
+    let naubino: Naubino
 
     beforeEach(function () {
         naubino = new Naubino()
         naubino.size = { x: 200, y: 200 }
     })
 
-    it("finds naub", () => {
-        const naub_a = naubino.create_naub()
-        naub_a.pos = { x: 10, y: 10 }
-        const naub_b = naubino.create_naub()
-        naub_b.pos = { x: -10, y: -10 }
-        const naub = naubino.find_naub(naub_a.pos)
-        console.assert(naub == naub_a)
+    describe("find_naub", function () {
+        let naub_a : Naub
+        let naub_b : Naub
+        beforeEach(function () {
+            naub_a = naubino.create_naub()
+            naub_a.pos = { x: 10, y: 10 }
+            naub_b = naubino.create_naub()
+            naub_b.pos = { x: -10, y: -10 }
+        })
+        it("finds naub at naub center", function () {
+            const naub = naubino.find_naub(naub_a.pos)
+            assert.equal(naub, naub_a)
+        })
+        it("finds naub near border", function () {
+            const naub = naubino.find_naub({ x: naub_a.pos.x + naub_a.radius * 0.9, y: naub_a.pos.y })
+            assert.equal(naub, naub_a)
+        })
+        it("finds nothing at nothing", function () {
+            const naub = naubino.find_naub({ x: -20, y: 0 })
+            assert.isNull(naub)
+        })
     })
 
     describe("Pointer and Naubs", function () {
