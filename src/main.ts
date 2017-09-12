@@ -439,6 +439,13 @@ describe("Naubino", () => {
         })
     })
 
+    describe("merge_naubs", function () {
+        it("connects two single naubs")
+        it("connects single naub with naub pair")
+        it("connects two naub pairs to a chain")
+        it("connects two naub pairs and merges naub_a")
+    })
+
     describe("Pointer and Naubs", function () {
         let naub_a : Naub
         let naub_b : Naub
