@@ -465,7 +465,9 @@ describe("naubino", () => {
             const below = _.filter(chain, (naub) => naub.pos.y > -10).length
             console.assert(above == 5, "above == 5")
             console.assert(below == 5, "below == 5")
-            _.every(chain, (naub) => assert.closeTo(naub.pos.x, 10, 0.0001))
+            for (const naub of chain) {
+                assert.closeTo(naub.pos.x, 10, 0.0001)
+            }
         })
     })
 
