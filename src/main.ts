@@ -399,7 +399,7 @@ function test_200naubs() {
     */
 }
 
-describe("pointer", () => {
+describe("Pointer", () => {
     it("moves", () => {
         const pointer = new Pointer({ x: 0, y: 0 })
         pointer.pos = { x: 10, y: 0 }
@@ -408,7 +408,7 @@ describe("pointer", () => {
     })
 })
 
-describe("naubino", () => {
+describe("Naubino", () => {
     let naubino: Naubino;
 
     beforeEach(function () {
@@ -425,18 +425,32 @@ describe("naubino", () => {
         console.assert(naub == naub_a)
     })
 
-    it("connects naub with pointer and moves naub", () => {
-        const naub = naubino.create_naub()
-        naub.pos = { x: 10, y: 10 }
-        const pointer = naubino.connect_pointer_naub(naub)
-        pointer.pos.x += 10
-        // TODO first, naub bounces back. the pointer constraint moves not good
-        for (let i = 0; i < 10; i++) {
-            pointer.step()
-            naubino.step()
-            //console.log("naub.pos.x", naub.pos.x)
-        }
-        console.assert(naub.pos.x > 10)
+    describe("Pointer and Naubs", function () {
+        let naub_a : Naub
+        let naub_b : Naub
+        beforeEach(function () {
+            naub_a = naubino.create_naub()
+            naub_b = naubino.create_naub()
+            naub_a.pos = { x: 10, y: 10 }
+            naub_b.pos = { x: naub_a.pos.x + naub_a.radius + naub_b.radius, y: 10 }
+        })
+        it("connects naub", function () {
+            const pointer = naubino.connect_pointer_naub(naub_a)
+            assert(pointer)
+        })
+        it("moves naub", function () {
+            const x_before = naub_a.pos.x
+            const pointer = naubino.connect_pointer_naub(naub_a)
+            pointer.pos.x = x_before - 10
+            // TODO first, naub bounces back. the pointer constraint moves not good
+            for (let i = 0; i < 10; i++) {
+                pointer.step()
+                naubino.step()
+                //console.log("naub.pos.x", naub.pos.x)
+            }
+            console.assert(naub_a.pos.x < x_before)
+        })
+        it("merges naubs next to each other")
     })
 
     describe("create_naub_chain", function () {
@@ -520,7 +534,7 @@ describe("naubino", () => {
     })
 })
 
-describe("hunter", () => {
+describe("Hunter", () => {
     let naubino: Naubino;
 
     beforeEach(function () {
