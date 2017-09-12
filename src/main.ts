@@ -159,8 +159,9 @@ class Naubino {
 
     engine: Matter.Engine = Matter.Engine.create()
 
-    create_naub() {
+    create_naub(pos? : Vector) {
         let naub = new Naub()
+        if (pos) naub.pos = Vector.clone(pos)
         naub.naubino = this
         return naub
     }
@@ -572,10 +573,8 @@ describe("Hunter", () => {
     })
 
     it("moves naub", () => {
-        const naub_a = naubino.create_naub();
-        naub_a.pos = { x: -10, y: 0 }
-        const naub_b = naubino.create_naub();
-        naub_b.pos = { x: 0, y: 0 }
+        const naub_a = naubino.create_naub({x: -10, y: 0 });
+        const naub_b = naubino.create_naub({x: 0, y: 0 });
         console.assert(naubino.naubs.size == 2)
         const hunter = new Hunter(naubino, naub_a, naub_b)
         // TODO bounce back undesired (naub_a.pos.x < -10)
