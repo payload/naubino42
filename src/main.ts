@@ -432,7 +432,7 @@ describe("Naubino", () => {
             naub_a = naubino.create_naub()
             naub_b = naubino.create_naub()
             naub_a.pos = { x: 10, y: 10 }
-            naub_b.pos = { x: naub_a.pos.x + naub_a.radius + naub_b.radius, y: 10 }
+            naub_b.pos = { x: naub_a.pos.x + naub_a.radius + naub_b.radius + 1, y: 10 }
         })
         it("connects naub", function () {
             const pointer = naubino.connect_pointer_naub(naub_a)
@@ -450,7 +450,15 @@ describe("Naubino", () => {
             }
             console.assert(naub_a.pos.x < x_before)
         })
-        it("merges naubs next to each other")
+        it("merges naubs next to each other", function () {
+            const pointer = naubino.connect_pointer_naub(naub_a)
+            pointer.pos = Vector.clone(naub_b.pos)
+            for (let i = 0; i < 100; i++) {
+                pointer.step()
+                naubino.step()
+            }
+            assert.equal(naubino.naubs.size, 0)
+        })
     })
 
     describe("create_naub_chain", function () {
