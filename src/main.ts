@@ -421,10 +421,8 @@ describe("Naubino", () => {
         let naub_a : Naub
         let naub_b : Naub
         beforeEach(function () {
-            naub_a = naubino.create_naub()
-            naub_a.pos = { x: 10, y: 10 }
-            naub_b = naubino.create_naub()
-            naub_b.pos = { x: -10, y: -10 }
+            naub_a = naubino.create_naub({ x: 10, y: 10 })
+            naub_b = naubino.create_naub({ x: -10, y: -10 })
         })
         it("finds naub at naub center", function () {
             const naub = naubino.find_naub(naub_a.pos)
@@ -451,10 +449,9 @@ describe("Naubino", () => {
         let naub_a : Naub
         let naub_b : Naub
         beforeEach(function () {
-            naub_a = naubino.create_naub()
+            const pos_b = { x: naub_a.pos.x + 2*naub_a.radius + 1, y: 10 }
+            naub_a = naubino.create_naub({ x: 10, y: 10 })
             naub_b = naubino.create_naub()
-            naub_a.pos = { x: 10, y: 10 }
-            naub_b.pos = { x: naub_a.pos.x + naub_a.radius + naub_b.radius + 1, y: 10 }
         })
         it("connects naub", function () {
             const pointer = naubino.connect_pointer_naub(naub_a)
