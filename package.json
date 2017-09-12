@@ -13,7 +13,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "matter-js": "*",
+    "matter-js": "https://github.com/payload/matter-js.git",
     "lodash": "*"
   },
   "devDependencies": {
