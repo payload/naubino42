@@ -41,10 +41,15 @@ class Naub {
 
     join_naub(other: Naub, joint: NaubJoint = null) {
         if (fail_condition(this.alive && other.alive)) return
+        if (fail_condition(this != other)) return
         if (this.naubs_joints.has(other)) return
         //console.log("Naub.join_naub")
         if (joint == null) {
-            joint = this.naubino.create_naub_joint(this, other)
+            if (!this.naubino) {
+                joint = new NaubJoint(this, other)
+            } else {
+                joint = this.naubino.create_naub_joint(this, other)
+            }
         }
         this.naubs_joints.set(other, joint)
         other.join_naub(this, joint)
@@ -56,6 +61,10 @@ class Naub {
             self.naubs_joints[naub] = joint
             naub.join_naub(self, joint)
         */
+    }
+
+    is_joined(other: Naub) {
+        return this.naubs_joints.has(other)
     }
 
     // like pynaubino good_merge_naub
@@ -409,6 +418,35 @@ describe("Pointer", () => {
     })
 })
 
+describe("Naub", function () {
+    let naub_a : Naub
+    let naub_b : Naub
+    beforeEach(function () {
+        naub_a = new Naub()
+        naub_b = new Naub()
+    })
+    describe("join_naub", function () {
+        it("not is_joined", function () {
+            assert.isFalse(naub_a.is_joined(naub_b))
+            assert.isFalse(naub_b.is_joined(naub_a))
+            assert.isFalse(naub_a.is_joined(naub_a))
+        })
+        it("is_joined after join_naub", function () {
+            naub_a.join_naub(naub_b)
+            assert.isTrue(naub_a.is_joined(naub_b))
+            assert.isTrue(naub_b.is_joined(naub_a))
+            assert.isFalse(naub_a.is_joined(naub_a))
+        })
+        it("join_naub twice is okay", function () {
+            naub_a.join_naub(naub_b)
+            assert.doesNotThrow(() => naub_a.join_naub(naub_b))
+        })
+        it("join_naub on itself not okay", function () {
+            assert.throws(() => naub_a.join_naub(naub_a))
+        })
+    })
+})
+
 describe("Naubino", () => {
     let naubino: Naubino
 
@@ -443,7 +481,7 @@ describe("Naubino", () => {
             const naub_a = naubino.create_naub();
             const naub_b = naubino.create_naub();
             naubino.merge_naubs(naub_a, naub_b);
-            assert.isTrue(naub_a.is_connected(naub_b))
+            assert.isTrue(naub_a.is_joined(naub_b))
         })
         it("connects single naub with naub pair")
         it("connects two naub pairs to a chain")
