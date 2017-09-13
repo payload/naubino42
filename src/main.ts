@@ -584,17 +584,25 @@ describe("Naubino", () => {
             const naubs_a = naubino.create_naub_chain(2)
             const naubs_b = naubino.create_naub_chain(2)
             naubino.join_or_merge_naubs(naubs_a[0], naubs_b[0])
+            assert.isTrue(naubs_a[0].is_joined(naubs_a[1]))
             assert.isTrue(naubs_a[0].is_joined(naubs_b[1]))
+            assert.isFalse(naubs_a[0].is_joined(naubs_b[0]))
+        })
+        it("merge two naub pairs and kill naub_b", function () {
+            const naubs_a = naubino.create_naub_chain(2)
+            const naubs_b = naubino.create_naub_chain(2)
+            naubino.join_or_merge_naubs(naubs_a[0], naubs_b[0])
             assert.isTrue(naubs_a[0].alive)
+            assert.isTrue(naubs_a[1].alive)
+            assert.isTrue(naubs_b[1].alive)
             assert.isFalse(naubs_b[0].alive)
         })
-        it("connects two naub pairs and merges naub_a")
     })
 
     describe("Pointer and Naubs", function () {
         let naub_a: Naub
         let naub_b: Naub
-        beforeEach(function () { 
+        beforeEach(function () {
             naub_a = naubino.create_naub({ x: 10, y: 10 })
             const pos_b = { x: naub_a.pos.x + 2 * naub_a.radius + 1, y: 10 }
             naub_b = naubino.create_naub(pos_b)
