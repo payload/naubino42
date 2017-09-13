@@ -339,6 +339,17 @@ class Naubino {
         return pointer
     }
 
+    join_or_merge_naubs(naub_a: Naub, naub_b: Naub) {
+        if (!naub_a.merges_with(naub_b)) return false
+        if (naub_a.naubs_joints.size == 0) {
+            naub_a.join_naub(naub_b)
+            return true
+        }
+        naub_a.merge_naub(naub_b)
+        //const cycle = this.test_cycle(naub_a)
+        //if (cycle) this.pop_cycle(cycle)
+    }
+
     step() {
         //console.log("Naubino.step")
         for (const pointer of this.pointers) {
@@ -556,13 +567,13 @@ describe("Naubino", () => {
         })
     })
 
-    describe("collide_naubs", function () {
-        it("connects two single naubs"/*, function () {
+    describe("join_or_merge_naubs", function () {
+        it("connects two single naubs", function () {
             const naub_a = naubino.create_naub();
             const naub_b = naubino.create_naub();
-            naubino.collide_naubs(naub_a, naub_b);
+            naubino.join_or_merge_naubs(naub_a, naub_b);
             assert.isTrue(naub_a.is_joined(naub_b))
-        }*/)
+        })
         it("connects single naub with naub pair")
         it("connects two naub pairs to a chain")
         it("connects two naub pairs and merges naub_a")
