@@ -568,19 +568,26 @@ describe("Naubino", () => {
     })
 
     describe("join_or_merge_naubs", function () {
-        it("connects two single naubs", function () {
+        it("join two single naubs", function () {
             const naub_a = naubino.create_naub();
             const naub_b = naubino.create_naub();
             naubino.join_or_merge_naubs(naub_a, naub_b);
             assert.isTrue(naub_a.is_joined(naub_b))
         })
-        it("connects single naub with naub pair", function () {
+        it("join single naub with naub pair", function () {
             const naub_a = naubino.create_naub()
             const naubs = naubino.create_naub_chain(2)
             naubino.join_or_merge_naubs(naub_a, naubs[0])
             assert.isTrue(naub_a.is_joined(naubs[0]))
         })
-        it("connects two naub pairs to a chain")
+        it("merge two naub pairs to a chain", function () {
+            const naubs_a = naubino.create_naub_chain(2)
+            const naubs_b = naubino.create_naub_chain(2)
+            naubino.join_or_merge_naubs(naubs_a[0], naubs_b[0])
+            assert.isTrue(naubs_a[0].is_joined(naubs_b[1]))
+            assert.isTrue(naubs_a[0].alive)
+            assert.isFalse(naubs_b[0].alive)
+        })
         it("connects two naub pairs and merges naub_a")
     })
 
