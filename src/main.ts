@@ -31,12 +31,19 @@ class Naub {
     get naubino() { return this._naubino }
     set naubino(naubino) {
         if (this._naubino === naubino) return
-        console.assert(!this._naubino) // could be removed with proper deregistration
+        if (this._naubino) this._remove_from_naubino()
         this._naubino = naubino
-        if (naubino) {
-            Matter.World.add(this.naubino.engine.world, this.body)
-            naubino.add_naub(this)
-        }
+        if (this._naubino) this._add_to_naubino()
+    }
+
+    _add_to_naubino() {
+        Matter.World.add(this._naubino.engine.world, this.body)
+        this._naubino.add_naub(this)
+    }
+
+    _remove_from_naubino() {
+        Matter.World.remove(this._naubino.engine.world, this.body)
+        this._naubino.remove_naub(this)
     }
 
     join_naub(other: Naub, joint: NaubJoint = null) {
@@ -70,6 +77,19 @@ class Naub {
         joint.naubino = null
         this.naubs_joints.delete(other)
         other.unjoin_naub(this)
+    }
+
+    merge_naub(other: Naub) {
+        const other_naubs_joints = new Map(other.naubs_joints)
+        for (const joined_naub of other_naubs_joints.keys()) {
+            other.unjoin_naub(joined_naub)
+            this.join_naub(joined_naub)
+        }
+        other.remove()
+    }
+
+    remove() {
+        this.alive = false
     }
 
     is_joined(other: Naub) {
@@ -122,7 +142,7 @@ class NaubJoint {
     }
 
     _remove_from_naubino() {
-        Matter.World.remove(this._naubino.engine.world, this._contraint)
+        Matter.World.remove(this._naubino.engine.world, this._constraint)
         this._naubino.remove_naub_joint(this)
     }
 }
@@ -184,7 +204,7 @@ class Naubino {
 
     engine: Matter.Engine = Matter.Engine.create()
 
-    create_naub(pos? : Vector) {
+    create_naub(pos?: Vector) {
         let naub = new Naub()
         if (pos) naub.pos = Vector.clone(pos)
         naub.naubino = this
@@ -255,7 +275,6 @@ class Naubino {
 
     add_naub(naub: Naub) {
         //console.log("Naubino.add_naub")
-        if (this.naubs.has(naub)) return
         naub.naubino = this
         this.naubs.add(naub)
         // TODO mode.add_naub(naub), but do it with cb, different concept
@@ -270,6 +289,10 @@ class Naubino {
     
         self.cb.add_naub(naub)
         */
+    }
+    remove_naub(naub: Naub) {
+        this.naubs.delete(naub)
+        naub.naubino = null
     }
 
     add_naub_joint(joint: NaubJoint) {
@@ -438,13 +461,13 @@ describe("Pointer", () => {
 })
 
 describe("Naub", function () {
-    let naub_a : Naub
-    let naub_b : Naub
+    let naub_a: Naub
+    let naub_b: Naub
     beforeEach(function () {
         naub_a = new Naub()
         naub_b = new Naub()
     })
-    describe("is_joined", function() {
+    describe("is_joined", function () {
         it("default false", function () {
             assert.isFalse(naub_a.is_joined(naub_b))
             assert.isFalse(naub_b.is_joined(naub_a))
@@ -470,7 +493,7 @@ describe("Naub", function () {
             assert.throws(() => naub_a.join_naub(naub_a))
         })
     })
-    describe("unjoin_naub", function() {
+    describe("unjoin_naub", function () {
         it("makes is_joined false", function () {
             naub_a.join_naub(naub_b)
             naub_a.unjoin_naub(naub_b)
@@ -481,6 +504,25 @@ describe("Naub", function () {
         })
         it("call on itself is not okay", function () {
             assert.throws(() => naub_a.unjoin_naub(naub_a))
+        })
+    })
+    describe("merge_naub", function () {
+        beforeEach(function () {
+            naub_b.join_naub(new Naub())
+            naub_b.join_naub(new Naub())
+        })
+        it("kills other naub", function () {
+            naub_a.merge_naub(naub_b)
+            assert.equal(naub_b.alive, false)
+        })
+        it("joins this naub with neighbors of other naub", function () {
+            const neighbors = _.clone(naub_b.naubs_joints)
+            naub_a.merge_naub(naub_b)
+            assert.deepEqual(naub_a.naubs_joints.keys(), neighbors.keys())
+        })
+        it("unjoins other naub from neighbors", function () {
+            naub_a.merge_naub(naub_b)
+            assert.equal(naub_b.naubs_joints.size, 0)
         })
     })
 })
@@ -494,8 +536,8 @@ describe("Naubino", () => {
     })
 
     describe("find_naub", function () {
-        let naub_a : Naub
-        let naub_b : Naub
+        let naub_a: Naub
+        let naub_b: Naub
         beforeEach(function () {
             naub_a = naubino.create_naub({ x: 10, y: 10 })
             naub_b = naubino.create_naub({ x: -10, y: -10 })
@@ -514,25 +556,25 @@ describe("Naubino", () => {
         })
     })
 
-    describe("merge_naubs", function () {
-        it("connects two single naubs", function () {
+    describe("collide_naubs", function () {
+        it("connects two single naubs"/*, function () {
             const naub_a = naubino.create_naub();
             const naub_b = naubino.create_naub();
-            naubino.merge_naubs(naub_a, naub_b);
+            naubino.collide_naubs(naub_a, naub_b);
             assert.isTrue(naub_a.is_joined(naub_b))
-        })
+        }*/)
         it("connects single naub with naub pair")
         it("connects two naub pairs to a chain")
         it("connects two naub pairs and merges naub_a")
     })
 
     describe("Pointer and Naubs", function () {
-        let naub_a : Naub
-        let naub_b : Naub
-        beforeEach(function () {
-            const pos_b = { x: naub_a.pos.x + 2*naub_a.radius + 1, y: 10 }
+        let naub_a: Naub
+        let naub_b: Naub
+        beforeEach(function () { 
             naub_a = naubino.create_naub({ x: 10, y: 10 })
-            naub_b = naubino.create_naub()
+            const pos_b = { x: naub_a.pos.x + 2 * naub_a.radius + 1, y: 10 }
+            naub_b = naubino.create_naub(pos_b)
         })
         it("connects naub", function () {
             const pointer = naubino.connect_pointer_naub(naub_a)
@@ -651,8 +693,8 @@ describe("Hunter", () => {
     })
 
     it("moves naub", () => {
-        const naub_a = naubino.create_naub({x: -10, y: 0 });
-        const naub_b = naubino.create_naub({x: 0, y: 0 });
+        const naub_a = naubino.create_naub({ x: -10, y: 0 });
+        const naub_b = naubino.create_naub({ x: 0, y: 0 });
         console.assert(naubino.naubs.size == 2)
         const hunter = new Hunter(naubino, naub_a, naub_b)
         // TODO bounce back undesired (naub_a.pos.x < -10)
