@@ -63,6 +63,15 @@ class Naub {
         */
     }
 
+    unjoin_naub(other: Naub) {
+        if (fail_condition(this != other)) return
+        if (!this.naubs_joints.has(other)) return
+        const joint = this.naubs_joints.get(other)
+        joint.naubino = null
+        this.naubs_joints.delete(other)
+        other.unjoin_naub(this)
+    }
+
     is_joined(other: Naub) {
         return this.naubs_joints.has(other)
     }
@@ -102,12 +111,19 @@ class NaubJoint {
     get naubino() { return this._naubino }
     set naubino(naubino) {
         if (this._naubino === naubino) return
-        console.assert(!this._naubino) // could be removed with proper deregistration
+        if (this._naubino) this._remove_from_naubino()
         this._naubino = naubino
-        if (naubino) {
-            Matter.World.add(this.naubino.engine.world, this._constraint)
-            naubino.add_naub_joint(this)
-        }
+        if (this._naubino) this._add_to_naubino()
+    }
+
+    _add_to_naubino() {
+        Matter.World.add(this._naubino.engine.world, this._constraint)
+        this._naubino.add_naub_joint(this)
+    }
+
+    _remove_from_naubino() {
+        Matter.World.remove(this._naubino.engine.world, this._contraint)
+        this._naubino.remove_naub_joint(this)
     }
 }
 
@@ -258,6 +274,9 @@ class Naubino {
 
     add_naub_joint(joint: NaubJoint) {
         this.naub_joints.add(joint)
+    }
+    remove_naub_joint(joint: NaubJoint) {
+        this.naub_joints.delete(joint)
     }
 
     // like pynaubino Naubino.touch_down
@@ -425,24 +444,43 @@ describe("Naub", function () {
         naub_a = new Naub()
         naub_b = new Naub()
     })
-    describe("join_naub", function () {
-        it("not is_joined", function () {
+    describe("is_joined", function() {
+        it("default false", function () {
             assert.isFalse(naub_a.is_joined(naub_b))
             assert.isFalse(naub_b.is_joined(naub_a))
             assert.isFalse(naub_a.is_joined(naub_a))
         })
-        it("is_joined after join_naub", function () {
+        it("after join_naub true only with joined naubs", function () {
             naub_a.join_naub(naub_b)
             assert.isTrue(naub_a.is_joined(naub_b))
             assert.isTrue(naub_b.is_joined(naub_a))
             assert.isFalse(naub_a.is_joined(naub_a))
         })
-        it("join_naub twice is okay", function () {
+    })
+    describe("join_naub", function () {
+        it("makes is_joined true", function () {
+            naub_a.join_naub(naub_b)
+            assert.isTrue(naub_a.is_joined(naub_b))
+        })
+        it("call twice is okay", function () {
             naub_a.join_naub(naub_b)
             assert.doesNotThrow(() => naub_a.join_naub(naub_b))
         })
-        it("join_naub on itself not okay", function () {
+        it("call on itself is not okay", function () {
             assert.throws(() => naub_a.join_naub(naub_a))
+        })
+    })
+    describe("unjoin_naub", function() {
+        it("makes is_joined false", function () {
+            naub_a.join_naub(naub_b)
+            naub_a.unjoin_naub(naub_b)
+            assert.isFalse(naub_a.is_joined(naub_b))
+        })
+        it("call on unjoined naub is okay", function () {
+            assert.doesNotThrow(() => naub_a.unjoin_naub(naub_b))
+        })
+        it("call on itself is not okay", function () {
+            assert.throws(() => naub_a.unjoin_naub(naub_a))
         })
     })
 })
