@@ -597,6 +597,15 @@ describe("Naubino", () => {
             assert.isTrue(naubs_b[1].alive)
             assert.isFalse(naubs_b[0].alive)
         })
+        it("merge two naub chains, cycle removed", function () {
+            const naubs_a = naubino.create_naub_chain(3)
+            const naubs_b = naubino.create_naub_chain(3)
+            naubino.naub_touches_naub(naubs_a[0], naubs_b[0])
+            naubino.naub_touches_naub(naubs_a[2], naubs_b[2])
+            for (const naub of naubs_a.concat(naubs_b)) {
+                assert.isFalse(naub.alive, "naub alive")
+            }
+        })
     })
 
     describe("Pointer and Naubs", function () {
