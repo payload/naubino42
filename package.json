@@ -13,8 +13,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "lodash": "*",
     "matter-js": "https://github.com/payload/matter-js.git",
-    "lodash": "*"
+    "ts-mocha": "^1.0.3"
   },
   "devDependencies": {
     "chai": "*",
