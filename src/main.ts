@@ -339,7 +339,7 @@ class Naubino {
         return pointer
     }
 
-    join_or_merge_naubs(naub_a: Naub, naub_b: Naub) {
+    naub_touches_naub(naub_a: Naub, naub_b: Naub) {
         if (!naub_a.merges_with(naub_b)) return false
         if (naub_a.naubs_joints.size == 0) {
             naub_a.join_naub(naub_b)
@@ -567,23 +567,23 @@ describe("Naubino", () => {
         })
     })
 
-    describe("join_or_merge_naubs", function () {
+    describe("naub_touches_naub", function () {
         it("join two single naubs", function () {
             const naub_a = naubino.create_naub();
             const naub_b = naubino.create_naub();
-            naubino.join_or_merge_naubs(naub_a, naub_b);
+            naubino.naub_touches_naub(naub_a, naub_b);
             assert.isTrue(naub_a.is_joined(naub_b))
         })
         it("join single naub with naub pair", function () {
             const naub_a = naubino.create_naub()
             const naubs = naubino.create_naub_chain(2)
-            naubino.join_or_merge_naubs(naub_a, naubs[0])
+            naubino.naub_touches_naub(naub_a, naubs[0])
             assert.isTrue(naub_a.is_joined(naubs[0]))
         })
         it("merge two naub pairs to a chain", function () {
             const naubs_a = naubino.create_naub_chain(2)
             const naubs_b = naubino.create_naub_chain(2)
-            naubino.join_or_merge_naubs(naubs_a[0], naubs_b[0])
+            naubino.naub_touches_naub(naubs_a[0], naubs_b[0])
             assert.isTrue(naubs_a[0].is_joined(naubs_a[1]))
             assert.isTrue(naubs_a[0].is_joined(naubs_b[1]))
             assert.isFalse(naubs_a[0].is_joined(naubs_b[0]))
@@ -591,7 +591,7 @@ describe("Naubino", () => {
         it("merge two naub pairs and kill naub_b", function () {
             const naubs_a = naubino.create_naub_chain(2)
             const naubs_b = naubino.create_naub_chain(2)
-            naubino.join_or_merge_naubs(naubs_a[0], naubs_b[0])
+            naubino.naub_touches_naub(naubs_a[0], naubs_b[0])
             assert.isTrue(naubs_a[0].alive)
             assert.isTrue(naubs_a[1].alive)
             assert.isTrue(naubs_b[1].alive)
