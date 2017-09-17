@@ -285,10 +285,9 @@ describe("Naubino", () => {
                 const cycles = test_cycle[0].find_cycles()
                 assert.isNotEmpty(cycles, "no cycles found")
 
-                console.log(test_cycle.length, cycles[0].length)
                 assert.deepEqual(new Set(test_cycle), new Set(cycles[0]))
             })
-            it("finds cycle of three in triangle star", function () {
+            it("finds cycle of three from tristar end", function () {
                 const test_cycle = naubino.create_naub_chain(3);
                 test_cycle[0].join_naub(test_cycle[test_cycle.length - 1])
                 const spike_a = naubino.create_naub_chain(2)
@@ -297,7 +296,7 @@ describe("Naubino", () => {
                 test_cycle[1].join_naub(spike_b[0])
                 const spike_c = naubino.create_naub_chain(2)
                 test_cycle[2].join_naub(spike_c[0])
-                const cycles = test_cycle[0].find_cycles()
+                const cycles = spike_a[1].find_cycles()
                 assert.deepEqual(new Set(test_cycle), new Set(cycles[0]))
             })
         })
