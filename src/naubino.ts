@@ -142,15 +142,15 @@ class Naub {
                         && naub.cycle_check == 1) {
                         cycle.push(naub)
                     }
-                    if (cycle) return cycle
                 }
+                if (cycle.length > 1) return cycle
             }
             v.cycle_check = 2
         }
     }
 
     reachable_naubs(visited = new Array<Naub>()) {
-        if (visited.lastIndexOf(this)) return []
+        if (visited.lastIndexOf(this) >= 0) return []
         visited.push(this)
         const nodes = [this]
         for (const naub of this.naubs_joints.keys()) {
