@@ -22,6 +22,8 @@ class Naub {
     naubs_joints = new Map<Naub, NaubJoint>()
     body = Matter.Bodies.circle(0, 0, this._radius)
     color = "red"
+    cycle_check = 0
+    cycle_number = 0
 
     get pos() { return this.body.position }
     set pos(pos) { Matter.Body.setPosition(this.body, pos) }
@@ -112,7 +114,59 @@ class Naub {
         }
         return false
     }
+
+    find_cycles() {
+        const naubs = this.reachable_naubs()
+        for (const naub of naubs) {
+            naub.cycle_check = 0
+            naub.cycle_number = 0
+        }
+        const progress = 1
+        for (const naub of naubs) {
+            if (naub.cycle_number == 0) {
+                const cycle = this._find_cycles(naub, null, progress, naubs)
+                if (cycle) return [cycle]
+            }
+        }
+        return []
+    }
+
+    _find_cycles(v: Naub, pre: Naub, progress: number, naubs: Naub[]): Naub[] {
+        v.cycle_number = progress;
+        progress += 1;
+        v.cycle_check = 1;
+        const post = new Set(v.naubs_joints.keys())
+        if (pre) post.delete(pre)
+        for (const w of post) {
+            if (w.cycle_number == 0) {
+                const cycle = this._find_cycles(w, v, progress, naubs)
+                if (cycle) return cycle
+            }
+            if (w.cycle_check == 1) {
+                const cycle = []
+                for (const naub of naubs) {
+                    if (naub.cycle_number >= w.cycle_number
+                        && naub.cycle_check == 1) {
+                        cycle.push(naub)
+                    }
+                    if (cycle) return cycle
+                }
+            }
+            v.cycle_check = 2
+        }
+    }
+
+    reachable_naubs(visited = new Array<Naub>()) {
+        if (visited.lastIndexOf(this)) return []
+        visited.push(this)
+        const nodes = [this]
+        for (const naub of this.naubs_joints.keys()) {
+            nodes.push.apply(nodes, naub.reachable_naubs(visited))
+        }
+        return nodes
+    }
 }
+
 
 class NaubJoint {
     _naubino: any = null
@@ -672,6 +726,42 @@ describe("Naubino", () => {
             for (const naub of chain) {
                 assert.closeTo(naub.pos.x, 10, 0.0001)
             }
+        })
+    })
+
+    describe("Naub", function () {
+        describe("find_cycles", function () {
+            it("finds no cycle when there is none", function () {
+                const chain = naubino.create_naub_chain(3);
+                const cycles = chain[0].find_cycles()
+                assert.isEmpty(cycles)
+            })
+            it("finds cycle of three in triangle", function () {
+                const test_cycle = naubino.create_naub_chain(3);
+                const reachable_a = test_cycle[0].reachable_naubs()
+
+                test_cycle[0].join_naub(test_cycle[test_cycle.length - 1])
+                const reachable_b = test_cycle[0].reachable_naubs()
+                assert.deepEqual(reachable_a, reachable_b, "reachable_naubs after join_naub differs")
+
+                const cycles = test_cycle[0].find_cycles()
+                assert.isNotEmpty(cycles, "no cycles found")
+
+                console.log(test_cycle.length, cycles[0].length)
+                assert.deepEqual(new Set(test_cycle), new Set(cycles[0]))
+            })
+            it("finds cycle of three in triangle star", function () {
+                const test_cycle = naubino.create_naub_chain(3);
+                test_cycle[0].join_naub(test_cycle[test_cycle.length - 1])
+                const spike_a = naubino.create_naub_chain(2)
+                test_cycle[0].join_naub(spike_a[0])
+                const spike_b = naubino.create_naub_chain(2)
+                test_cycle[1].join_naub(spike_b[0])
+                const spike_c = naubino.create_naub_chain(2)
+                test_cycle[2].join_naub(spike_c[0])
+                const cycles = test_cycle[0].find_cycles()
+                assert.deepEqual(new Set(test_cycle), new Set(cycles[0]))
+            })
         })
     })
 
