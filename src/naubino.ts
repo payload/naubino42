@@ -1,8 +1,8 @@
 import { fail_condition } from "./utils"
 
-import Matter = require("matter-js")
+import * as Matter from "matter-js"
 import { Vector } from "matter-js"
-import _ = require("lodash")
+import * as _ from "lodash"
 
 function naub_joint_rest_length(a: Naub, b: Naub) {
     return (a.radius + b.radius) * 2
