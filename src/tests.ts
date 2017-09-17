@@ -1,7 +1,7 @@
 import { Naubino, Naub, NaubJoint, Pointer, Hunter } from "./naubino"
 
 import { assert } from "chai"
-import _ = require("lodash")
+import * as _ from "lodash"
 
 function test_200naubs() {
     let naubino = new Naubino()
