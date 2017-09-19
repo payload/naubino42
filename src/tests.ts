@@ -201,37 +201,33 @@ describe("Naubino", () => {
     })
 
     describe("Pointer and Naubs", function () {
-        let naub_a: Naub
-        let naub_b: Naub
-        beforeEach(function () {
-            naub_a = naubino.create_naub({ x: 10, y: 10 })
-            const pos_b = { x: naub_a.pos.x + 2 * naub_a.radius + 1, y: 10 }
-            naub_b = naubino.create_naub(pos_b)
-        })
         it("connects naub", function () {
+            const naub_a = naubino.create_naub({ x: 10, y: 10 })
             const pointer = naubino.connect_pointer_naub(naub_a)
             assert(pointer)
         })
         it("moves naub", function () {
-            const x_before = naub_a.pos.x
+            const x_before = 10
+            const naub_a = naubino.create_naub({ x: x_before, y: 10 })
             const pointer = naubino.connect_pointer_naub(naub_a)
             pointer.pos.x = x_before - 10
             // TODO first, naub bounces back. the pointer constraint moves not good
             for (let i = 0; i < 10; i++) {
                 pointer.step()
                 naubino.step()
-                //console.log("naub.pos.x", naub.pos.x)
             }
-            console.assert(naub_a.pos.x < x_before)
+            assert.isBelow(naub_a.pos.x, x_before)
         })
-        it("merges naubs next to each other", function () {
-            const pointer = naubino.connect_pointer_naub(naub_a)
-            pointer.pos = _.clone(naub_b.pos)
+        it("merges naub pairs next to each other", function () {
+            const naubs_a = naubino.create_naub_chain(2, { x: 0, y: 10 })
+            const naubs_b = naubino.create_naub_chain(2, { x: 0, y: -10 })
+            const pointer = naubino.connect_pointer_naub(naubs_a[0])
+            pointer.pos = { x: naubs_b[0].pos.x, y: naubs_b[0].pos.y }
             for (let i = 0; i < 100; i++) {
                 pointer.step()
                 naubino.step()
             }
-            assert.equal(naubino.naubs.size, 0)
+            assert.equal(naubino.naubs.size, 3)
         })
     })
 
