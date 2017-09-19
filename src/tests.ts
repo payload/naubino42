@@ -3,57 +3,6 @@ import { Naubino, Naub, NaubJoint, Pointer, Hunter } from "./naubino"
 import { assert } from "chai"
 import * as _ from "lodash"
 
-function test_200naubs() {
-    let naubino = new Naubino()
-    naubino.size = { x: 200, y: 200 }
-
-    let chain_a = naubino.create_naub_chain(100, { x: 0, y: -10 })
-    let chain_b = naubino.create_naub_chain(100, { x: 0, y: 10 })
-    /* python
-    chain_a         = naubino.create_naub_chain(100, (0, -10))
-    chain_b         = naubino.create_naub_chain(100, (0,  10))
-    */
-    let chain_naubs = chain_a.concat(chain_b)
-    for (let naub of chain_naubs) {
-        naubino.add_naub(naub)
-    }
-    console.assert(naubino.naubs.size == 200)
-    naubino.step()
-    console.assert(naubino.engine.world.bodies.length >= 200)
-    /* python
-    for naub in chain_a + chain_b:
-        naubino.add_naub(naub)
-    naubino.step(0.0166)
-    */
-    let hunter_0 = new Hunter(naubino, chain_a[0], chain_b[0])
-    let hunter_1 = new Hunter(naubino, chain_a[chain_a.length - 1], chain_b[chain_b.length - 1])
-    /* python
-    hunter_0        = autoplay.Hunter(naubino, chain_a[ 0], chain_b[ 0])
-    hunter_1        = autoplay.Hunter(naubino, chain_a[-1], chain_b[-1])
-    */
-    //console.log("hunting")
-    let hunters = [hunter_0, hunter_1]
-    for (let i = 0; i < 10 && hunters.length > 0; ++i) {
-        hunters = hunters.filter((hunter) => {
-            hunter.step()
-            return !hunter.finished
-        })
-        naubino.step()
-    }
-    console.assert(naubino.naubs.size == 0, "naubs == 0")
-    console.assert(naubino.pointers.size == 0, "pointers == 0")
-    /* python
-    hunters         = [hunter_0, hunter_1]
-    while hunters:
-        for h in hunters[:]:
-            if not h.step():
-                hunters.remove(h)
-        naubino.step(0.0166)
-    assert not naubino.naubs
-    assert not naubino.pointers
-    */
-}
-
 describe("Pointer", () => {
     it("moves", () => {
         const pointer = new Pointer({ x: 0, y: 0 })
@@ -341,7 +290,6 @@ describe("Hunter", () => {
         let hunter_0 = new Hunter(naubino, chain_a[0], chain_b[0])
         let hunter_1 = new Hunter(naubino, chain_a[chain_a.length - 1], chain_b[chain_b.length - 1])
 
-        console.log("hunting")
         let hunters = [hunter_0, hunter_1]
         for (let i = 0; i < 500 && hunters.length > 0; ++i) {
             hunters = hunters.filter((hunter) => {
