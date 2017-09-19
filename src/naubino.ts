@@ -8,6 +8,8 @@ function naub_joint_rest_length(a: Naub, b: Naub) {
     return (a.radius + b.radius) * 2
 }
 
+const bodyNaubMap = new Map<number, Naub>();
+
 class Naub {
     _naubino: Naubino = null
     _radius = 1
@@ -17,6 +19,10 @@ class Naub {
     color = "red"
     cycle_check = 0
     cycle_number = 0
+
+    constructor() {
+        bodyNaubMap.set(this.body.id, this)
+    }
 
     get pos() { return this.body.position }
     set pos(pos) { Matter.Body.setPosition(this.body, pos) }
@@ -45,7 +51,6 @@ class Naub {
         if (fail_condition(this.alive && other.alive)) return
         if (fail_condition(this != other)) return
         if (this.naubs_joints.has(other)) return
-        //console.log("Naub.join_naub")
         if (joint == null) {
             if (!this.naubino) {
                 joint = new NaubJoint(this, other)
@@ -85,6 +90,7 @@ class Naub {
 
     remove() {
         this.alive = false
+        bodyNaubMap.delete(this.body.id)
     }
 
     is_joined(other: Naub) {
@@ -157,6 +163,11 @@ class Naub {
             nodes.push.apply(nodes, naub.reachable_naubs(visited))
         }
         return nodes
+    }
+
+    collide_naub(other : Naub) {
+        console.log("collide_naub")
+        this.naubino.naub_touches_naub(this, other)
     }
 }
 
@@ -251,6 +262,22 @@ class Naubino {
 
     engine: Matter.Engine = Matter.Engine.create()
 
+    constructor() {
+        this.engine.world.gravity.x = 0
+        this.engine.world.gravity.y = 0
+        Matter.Events.on(this.engine, "collisionStart", (e) => this.on_collision_start(e))
+    }
+
+    on_collision_start({ name, pairs, source, timestamp } : Matter.IEventCollision<Matter.Engine>) {
+        for (const pair of pairs) {
+            const naub_a = bodyNaubMap.get(pair.bodyA.id)
+            const naub_b = bodyNaubMap.get(pair.bodyB.id)
+            if (naub_a && naub_b) {
+                naub_a.collide_naub(naub_b)
+            }
+        }
+    }
+
     create_naub(pos?: Vector) {
         let naub = new Naub()
         if (pos) naub.pos = Vector.clone(pos)
@@ -339,7 +366,6 @@ class Naubino {
     }
     remove_naub(naub: Naub) {
         this.naubs.delete(naub)
-        naub.naubino = null
     }
 
     add_naub_joint(joint: NaubJoint) {
@@ -393,6 +419,7 @@ class Naubino {
             return true
         }
         naub_a.merge_naub(naub_b)
+        naub_b.naubino = null
         //const cycle = this.test_cycle(naub_a)
         //if (cycle) this.pop_cycle(cycle)
     }
