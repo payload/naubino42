@@ -167,7 +167,6 @@ class Naub {
     }
 
     collide_naub(other : Naub) {
-        console.log("collide_naub")
         this.naubino.naub_touches_naub(this, other)
     }
 }
@@ -299,7 +298,6 @@ class Naubino {
     }
 
     create_naub_chain(n: number, chain_center: Vector = { x: 0, y: 0 }, rot: number = 0): Naub[] {
-        //console.log("Naubino.create_naub_chain")
         let naubs = _.times(n, () => { return this.create_naub() })
 
         // distance between each naub pair
@@ -349,7 +347,6 @@ class Naubino {
     }
 
     add_naub(naub: Naub) {
-        //console.log("Naubino.add_naub")
         naub.naubino = this
         this.naubs.add(naub)
         // TODO mode.add_naub(naub), but do it with cb, different concept
@@ -397,7 +394,6 @@ class Naubino {
 
     // like pynaubino Naub.select
     connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
-        //console.log("connect_pointer_naub")
         console.assert(naub.alive)
         if (!pos) pos = _.clone(naub.pos)
         if (!pointer) pointer = this.create_pointer(pos)
@@ -437,7 +433,6 @@ class Naubino {
     }
 
     step() {
-        //console.log("Naubino.step")
         for (const pointer of this.pointers) {
             pointer.step()
         }

@@ -273,7 +273,6 @@ describe("Naubino", () => {
             it("finds no cycle in middle of naub chain", function () {
                 const chain = naubino.create_naub_chain(5);
                 const cycles = chain[2].find_cycles()
-                console.log(cycles[0])
                 assert.isEmpty(cycles)
             })
             it("finds cycle of three in triangle", function () {
@@ -371,7 +370,6 @@ describe("Hunter", () => {
         for (let i = 0; i < 10; i++) {
             hunter.step()
             naubino.step()
-            //console.log("naub_a.pos.x", naub_a.pos.x, hunter._touch.pos.x)
         }
         console.assert(naub_a.pos.x > -10)
     })
