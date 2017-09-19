@@ -74,6 +74,7 @@ class Naub {
         if (fail_condition(this != other)) return
         if (!this.naubs_joints.has(other)) return
         const joint = this.naubs_joints.get(other)
+        if (joint.naubino) joint.naubino.remove_naub_joint(joint)
         joint.naubino = null
         this.naubs_joints.delete(other)
         other.unjoin_naub(this)
@@ -91,6 +92,9 @@ class Naub {
     remove() {
         this.alive = false
         bodyNaubMap.delete(this.body.id)
+        this.naubs_joints.forEach((joint, naub) => {
+            this.unjoin_naub(naub)
+        })
     }
 
     is_joined(other: Naub) {
@@ -236,19 +240,26 @@ class Hunter {
         }
         if (!_naub_a.alive) {
             _touch.up()
+            this._naubino.remove_pointer(_touch)
             this.finished = true
             return // naub_a not alive
         }
         if (!_naub_a.merges_with(_naub_b)) {
             _touch.up()
+            this._naubino.remove_pointer(_touch)
             this.finished = true
             return // naub_a doesn't merge with naub_b
         }
         const a = _naub_a.pos
         const b = _naub_b.pos
-        const direction = Vector.normalise(Vector.sub(b, a))
-        const forward = Vector.mult(direction, this._force)
-        _touch.move(forward)
+        const diff = Vector.sub(b, a)
+        if (Vector.magnitudeSquared(diff) > 1) {
+            const direction = Vector.normalise(diff)
+            const forward = Vector.mult(direction, this._force)
+            _touch.move(forward)
+        } else {
+            _touch.move(diff)
+        }
     }
 }
 
@@ -295,6 +306,10 @@ class Naubino {
         let pointer = new Pointer(pos)
         this.pointers.add(pointer)
         return pointer
+    }
+
+    remove_pointer(pointer: Pointer) {
+        this.pointers.delete(pointer)
     }
 
     create_naub_chain(n: number, chain_center: Vector = { x: 0, y: 0 }, rot: number = 0): Naub[] {
