@@ -421,8 +421,19 @@ class Naubino {
         }
         naub_a.merge_naub(naub_b)
         naub_b.naubino = null
-        //const cycle = this.test_cycle(naub_a)
-        //if (cycle) this.pop_cycle(cycle)
+        const cycles = naub_a.find_cycles()
+        for (const cycle of cycles) {
+            this.pop_cycle(cycle)
+        }
+    }
+
+    pop_cycle(cycle: Naub[]) {
+        for (const naub of cycle) {
+            // TODO conceptualize removal
+            naub.remove()
+            this.remove_naub(naub)
+            naub.naubino = null
+        }
     }
 
     step() {
