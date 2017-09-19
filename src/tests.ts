@@ -265,9 +265,15 @@ describe("Naubino", () => {
 
     describe("Naub", function () {
         describe("find_cycles", function () {
-            it("finds no cycle when there is none", function () {
+            it("finds no cycle on beginning of naub chain", function () {
                 const chain = naubino.create_naub_chain(3);
                 const cycles = chain[0].find_cycles()
+                assert.isEmpty(cycles)
+            })
+            it("finds no cycle in middle of naub chain", function () {
+                const chain = naubino.create_naub_chain(5);
+                const cycles = chain[2].find_cycles()
+                console.log(cycles[0])
                 assert.isEmpty(cycles)
             })
             it("finds cycle of three in triangle", function () {
