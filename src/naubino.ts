@@ -124,7 +124,7 @@ class Naub {
         for (const naub of naubs) {
             if (naub.cycle_number == 0) {
                 const cycle = this._find_cycles(naub, null, progress, naubs)
-                if (cycle) return [cycle]
+                if (cycle.length > 0) return [cycle]
             }
         }
         return []
@@ -139,9 +139,9 @@ class Naub {
         for (const w of post) {
             if (w.cycle_number == 0) {
                 const cycle = this._find_cycles(w, v, progress, naubs)
-                if (cycle) return cycle
+                if (cycle.length > 0) return cycle
             }
-            if (w.cycle_check == 1) {
+            else if (w.cycle_check == 1) {
                 const cycle = []
                 for (const naub of naubs) {
                     if (naub.cycle_number >= w.cycle_number
@@ -153,6 +153,7 @@ class Naub {
             }
             v.cycle_check = 2
         }
+        return []
     }
 
     reachable_naubs(visited = new Array<Naub>()) {
