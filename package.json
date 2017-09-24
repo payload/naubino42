@@ -2,7 +2,6 @@
   "name": "naubino42",
   "version": "0.1.0",
   "description": "",
-  "main": "dist/main.js",
   "scripts": {
     "build": "npm run build-ts",
     "build-ts": "tsc",
