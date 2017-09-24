@@ -15,10 +15,12 @@ class Naub {
     _radius = 1
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
+    pointers = new Set<Pointer>()
     body = Matter.Bodies.circle(0, 0, this._radius)
     color = "red"
     cycle_check = 0
     cycle_number = 0
+    id = Math.random()
 
     constructor() {
         bodyNaubMap.set(this.body.id, this)
@@ -90,6 +92,7 @@ class Naub {
     }
 
     remove() {
+        // TODO remove registered pointers
         this.alive = false
         bodyNaubMap.delete(this.body.id)
         this.naubs_joints.forEach((joint, naub) => {
@@ -171,6 +174,7 @@ class Naub {
     }
 
     collide_naub(other : Naub) {
+        if (this.pointers.size == 0) return
         this.naubino.naub_touches_naub(this, other)
     }
 }
@@ -420,7 +424,9 @@ class Naubino {
             length: 2
         })
         Matter.World.add(this.engine.world, pointer.constraint)
+        // TODO map_naub_pointer unused
         this.map_naub_pointer.set(naub, pointer)
+        naub.pointers.add(pointer)
         return pointer
     }
 
@@ -493,7 +499,7 @@ class Pointer {
     }
 
     up() {
-
+        // TODO unregister from naub
     }
 
     move(to_move: Vector) {

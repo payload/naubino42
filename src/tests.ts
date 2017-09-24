@@ -1,3 +1,4 @@
+import { Vector } from "matter-js"
 import { Naubino, Naub, NaubJoint, Pointer, Hunter } from "./naubino"
 
 import { assert } from "chai"
@@ -177,6 +178,21 @@ describe("Naubino", () => {
                 naubino.step()
             }
             assert.equal(naubino.naubs.size, 3)
+        })
+        it("dont merge naubs without pointer", function () {
+            const naubs_a = naubino.create_naub_chain(2, { x: 0, y: 2 })
+            const pos_diff = Vector.sub(naubs_a[1].pos, naubs_a[0].pos)
+            const naubs_b = naubino.create_naub_chain(2, { x: pos_diff.x, y: 0 })
+            assert.equal(naubs_b[0].pos.x, naubs_a[1].pos.x, "naubs over another")
+            assert.isAbove(naubs_b[0].pos.x, 0, "naub not at 0x0")
+
+            const pointer = naubino.connect_pointer_naub(naubs_a[0])
+            pointer.pos = { x: -pos_diff.x, y: 0 }
+            for (let i = 0; i < 100; i++) {
+                pointer.step()
+                naubino.step()
+            }
+            assert.equal(naubino.naubs.size, 4, "no naub merged")
         })
     })
 
