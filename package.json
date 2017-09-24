@@ -8,23 +8,28 @@
     "build-ts": "tsc",
     "watch": "npm run watch-ts",
     "watch-ts": "tsc -w",
-    "start": "npm run build && npm run watch"
+    "test": "ts-mocha src/tests.ts",
+    "test-js": "mocha dist/tests",
+    "watchify": "watchify dist/main-web.js -o dist/main-web.browserify.js",
+    "browserify": "browserify dist/main-web.js -o dist/main-web.browserify.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "browserify": "*",
     "lodash": "*",
     "matter-js": "https://github.com/payload/matter-js.git",
-    "ts-mocha": "^1.0.3"
+    "watchify": "*"
   },
   "devDependencies": {
-    "chai": "*",
-    "mocha": "*",
-    "typescript": "*",
     "@types/chai": "*",
-    "@types/node": "*",
+    "@types/lodash": "*",
     "@types/matter-js": "*",
     "@types/mocha": "*",
-    "@types/lodash": "*"
+    "@types/node": "*",
+    "chai": "*",
+    "mocha": "*",
+    "ts-mocha": "^1.0.3",
+    "typescript": "*"
   }
 }

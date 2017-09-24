@@ -8,6 +8,11 @@ function naub_joint_rest_length(a: Naub, b: Naub) {
     return (a.radius + b.radius) * 2
 }
 
+class Update {
+    naubs: Set<Naub>
+    naub_joints: Set<NaubJoint>
+}
+
 const bodyNaubMap = new Map<number, Naub>();
 
 class Naub {
@@ -106,7 +111,7 @@ class Naub {
 
     // like pynaubino good_merge_naub
     merges_with(naub: Naub) {
-        const alive = this.alive
+        const alive = this.alive && naub.alive
         const joker = this.naubs_joints.size == 0
         const colors_alike = this.color == naub.color
         const naub_is_far = !this.is_naub_near(naub)
@@ -453,7 +458,7 @@ class Naubino {
         }
     }
 
-    step() {
+    step() : Update {
         for (const pointer of this.pointers) {
             pointer.step()
         }
@@ -476,6 +481,10 @@ class Naubino {
             self.stop()
             self.cb.fail()
         */
+        return <Update>{
+            naubs: this.naubs,
+            naub_joints: this.naub_joints
+        }
     }
 }
 
@@ -513,4 +522,4 @@ class Pointer {
     }
 }
 
-export { Naubino, Naub, NaubJoint, Pointer, Hunter  }
+export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update }
