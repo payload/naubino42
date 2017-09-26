@@ -177,11 +177,6 @@ class Naub {
         }
         return nodes
     }
-
-    collide_naub(other: Naub) {
-        if (this.pointers.size == 0) return
-        this.naubino.naub_touches_naub(this, other)
-    }
 }
 
 
@@ -286,7 +281,9 @@ class NaubColliderSystem {
             const naub_a = bodyNaubMap.get(pair.bodyA.id)
             const naub_b = bodyNaubMap.get(pair.bodyB.id)
             if (naub_a && naub_b) {
-                naub_a.collide_naub(naub_b)
+                if (naub_a.pointers.size > 0) {
+                    this.naub_touches_naub(naub_a, naub_b)
+                }
             }
         }
     }
