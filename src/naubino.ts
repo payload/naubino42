@@ -315,16 +315,72 @@ class NaubColliderSystem {
     }
 }
 
+class PointerSystem {
+
+    naubino: Naubino
+    engine: Matter.Engine
+    pointers = new Set<Pointer>()
+    map_naub_pointer = new Map<Naub, Pointer>();
+
+    constructor(naubino: Naubino, engine: Matter.Engine) {
+        this.naubino = naubino
+        this.engine = engine
+    }
+
+    // like pynaubino Naubino.touch_down
+    touch_down(pos: Vector) {
+        const naub = this.find_naub(pos)
+        if (naub) {
+            return this.connect_pointer_naub(naub)
+        }
+        return null
+    }
+
+    find_naub(pos: Vector): Naub {
+        const hits = Matter.Query.point(this.engine.world.bodies, pos)
+        for (const body of hits) {
+            for (const naub of this.naubino.naubs) {
+                if (naub.body == body) return naub
+            }
+        }
+        return null
+    }
+
+    // like pynaubino Naub.select
+    connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
+        console.assert(naub.alive)
+        if (!pos) pos = _.clone(naub.pos)
+        if (!pointer) pointer = this.naubino.create_pointer(pos)
+        console.assert(this.map_naub_pointer.get(naub) != pointer)
+        pointer.constraint = Matter.Constraint.create({
+            bodyA: pointer.body,
+            bodyB: naub.body,
+            pointB: Matter.Vector.sub(pointer.pos, naub.body.position),
+            length: 2
+        })
+        Matter.World.add(this.engine.world, pointer.constraint)
+        // TODO map_naub_pointer unused
+        this.map_naub_pointer.set(naub, pointer)
+        naub.pointers.add(pointer)
+        return pointer
+    }
+
+    step() {
+        for (const pointer of this.pointers) {
+            pointer.step()
+        }
+    }
+}
+
 class Naubino {
     size: Vector = { x: 1, y: 1 }
 
     naubs = new Set<Naub>()
     naub_joints = new Set<NaubJoint>()
-    pointers = new Set<Pointer>()
-    map_naub_pointer = new Map<Naub, Pointer>();
 
     engine = Matter.Engine.create()
     collider = new NaubColliderSystem(this, this.engine)
+    pointers = new PointerSystem(this, this.engine)
 
     constructor() {
         this.engine.world.gravity.x = 0
@@ -346,12 +402,12 @@ class Naubino {
 
     create_pointer(pos: Vector) {
         let pointer = new Pointer(pos)
-        this.pointers.add(pointer)
+        this.pointers.pointers.add(pointer)
         return pointer
     }
 
     remove_pointer(pointer: Pointer) {
-        this.pointers.delete(pointer)
+        this.pointers.pointers.delete(pointer)
     }
 
     create_naub_chain(n: number, chain_center: Vector = { x: 0, y: 0 }, rot: number = 0): Naub[] {
@@ -430,42 +486,16 @@ class Naubino {
         this.naub_joints.delete(joint)
     }
 
-    // like pynaubino Naubino.touch_down
     touch_down(pos: Vector) {
-        const naub = this.find_naub(pos)
-        if (naub) {
-            return this.connect_pointer_naub(naub)
-        }
-        return null
+        return this.pointers.touch_down(pos)
     }
 
     find_naub(pos: Vector): Naub {
-        const hits = Matter.Query.point(this.engine.world.bodies, pos)
-        for (const body of hits) {
-            for (const naub of this.naubs) {
-                if (naub.body == body) return naub
-            }
-        }
-        return null
+        return this.pointers.find_naub(pos)
     }
 
-    // like pynaubino Naub.select
     connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
-        console.assert(naub.alive)
-        if (!pos) pos = _.clone(naub.pos)
-        if (!pointer) pointer = this.create_pointer(pos)
-        console.assert(this.map_naub_pointer.get(naub) != pointer)
-        pointer.constraint = Matter.Constraint.create({
-            bodyA: pointer.body,
-            bodyB: naub.body,
-            pointB: Matter.Vector.sub(pointer.pos, naub.body.position),
-            length: 2
-        })
-        Matter.World.add(this.engine.world, pointer.constraint)
-        // TODO map_naub_pointer unused
-        this.map_naub_pointer.set(naub, pointer)
-        naub.pointers.add(pointer)
-        return pointer
+        return this.pointers.connect_pointer_naub(naub, pos, pointer)
     }
 
     naub_touches_naub(naub_a: Naub, naub_b: Naub) {
@@ -473,10 +503,7 @@ class Naubino {
     }
 
     step(): Update {
-        for (const pointer of this.pointers) {
-            pointer.step()
-        }
-
+        this.pointers.step()
         Matter.Engine.update(this.engine)
 
         const bodies = this.engine.world.bodies

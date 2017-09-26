@@ -315,6 +315,6 @@ describe("Hunter", () => {
             naubino.step()
         }
         console.assert(naubino.naubs.size == 0, "postcondition: naubs == 0")
-        console.assert(naubino.pointers.size == 0, "postcondition: pointers == 0")
+        console.assert(naubino.pointers.pointers.size == 0, "postcondition: pointers == 0")
     })
 })
