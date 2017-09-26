@@ -16,7 +16,6 @@ class Update {
 const bodyNaubMap = new Map<number, Naub>();
 
 class Naub {
-    _naubino: Naubino = null
     _radius = 1
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
@@ -26,8 +25,11 @@ class Naub {
     cycle_check = 0
     cycle_number = 0
     id = Math.random()
+    engine: Matter.Engine
 
-    constructor() {
+    constructor(engine?: Matter.Engine) {
+        this.engine = engine
+        if (this.engine) Matter.World.add(this.engine.world, this.body)
         bodyNaubMap.set(this.body.id, this)
     }
 
@@ -36,37 +38,16 @@ class Naub {
 
     get radius() { return this._radius }
 
-    get naubino() { return this._naubino }
-    set naubino(naubino) {
-        if (this._naubino === naubino) return
-        if (this._naubino) this._remove_from_naubino()
-        this._naubino = naubino
-        if (this._naubino) this._add_to_naubino()
-    }
-
-    _add_to_naubino() {
-        Matter.World.add(this._naubino.engine.world, this.body)
-        this._naubino.add_naub(this)
-    }
-
-    _remove_from_naubino() {
-        Matter.World.remove(this._naubino.engine.world, this.body)
-        this._naubino.remove_naub(this)
-    }
-
     join_naub(other: Naub, joint: NaubJoint = null) {
         if (fail_condition(this.alive && other.alive)) return
         if (fail_condition(this != other)) return
         if (this.naubs_joints.has(other)) return
         if (joint == null) {
-            if (!this.naubino) {
-                joint = new NaubJoint(this, other)
-            } else {
-                joint = this.naubino.create_naub_joint(this, other)
-            }
+            joint = new NaubJoint(this, other)
         }
         this.naubs_joints.set(other, joint)
         other.join_naub(this, joint)
+        return joint
         /* python
         if fail_condition(self.alive and naub.alive): return
         if not joint:
@@ -103,6 +84,7 @@ class Naub {
         this.naubs_joints.forEach((joint, naub) => {
             this.unjoin_naub(naub)
         })
+        if (this.engine) Matter.World.remove(this.engine.world, this.body)
     }
 
     is_joined(other: Naub) {
@@ -295,7 +277,7 @@ class NaubColliderSystem {
             return true
         }
         naub_a.merge_naub(naub_b)
-        naub_b.naubino = null
+        naub_b.remove()
         const cycles = naub_a.find_cycles()
         for (const cycle of cycles) {
             this.pop_cycle(cycle)
@@ -307,7 +289,6 @@ class NaubColliderSystem {
             // TODO conceptualize removal
             naub.remove()
             this.naubino.remove_naub(naub)
-            naub.naubino = null
         }
     }
 }
@@ -385,15 +366,15 @@ class Naubino {
     }
 
     create_naub(pos?: Vector) {
-        let naub = new Naub()
+        let naub = new Naub(this.engine)
         if (pos) naub.pos = Vector.clone(pos)
-        naub.naubino = this
+        this.add_naub(naub)
         return naub
     }
 
     create_naub_joint(naub_a: Naub, naub_b: Naub) {
         let joint = new NaubJoint(naub_a, naub_b)
-        joint.naubino = this
+        this.add_naub_joint(joint)
         return joint
     }
 
@@ -437,7 +418,7 @@ class Naubino {
 
         // join naubs
         for (let i = 0; i < naubs.length - 1; ++i) {
-            naubs[i].join_naub(naubs[i + 1])
+            this.add_naub_joint(naubs[i].join_naub(naubs[i + 1]))
         }
 
         return naubs
@@ -457,7 +438,6 @@ class Naubino {
     }
 
     add_naub(naub: Naub) {
-        naub.naubino = this
         this.naubs.add(naub)
         // TODO mode.add_naub(naub), but do it with cb, different concept
         // TODO cb.add_naub(naub)
@@ -502,6 +482,9 @@ class Naubino {
     step(): Update {
         this.pointers.step()
         Matter.Engine.update(this.engine)
+        for (const naub of this.naubs) {
+            if (!naub.alive) this.naubs.delete(naub)
+        }
 
         const bodies = this.engine.world.bodies
         const speed = _.sumBy(bodies, (body) => { return body.speed }) / bodies.length

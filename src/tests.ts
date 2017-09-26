@@ -177,7 +177,7 @@ describe("Naubino", () => {
                 pointer.step()
                 naubino.step()
             }
-            assert.equal(naubino.naubs.size, 3)
+            assert.equal(naubino.naubs.size, 3, "one naub removed")
         })
         it("dont merge naubs without pointer", function () {
             const naubs_a = naubino.create_naub_chain(2, { x: 0, y: 2 })
@@ -199,8 +199,8 @@ describe("Naubino", () => {
     describe("create_naub_chain", function () {
         it("creates naubs and joints", () => {
             const chain = naubino.create_naub_chain(10);
-            console.assert(naubino.naubs.size == 10)
-            console.assert(naubino.naub_joints.size == 9)
+            assert.equal(naubino.naubs.size, 10, "all naubs there")
+            assert.equal(naubino.naub_joints.size, 9, "all naub_joints there")
         })
         it("creates naubs around 0x0 horizontally", () => {
             const chain = naubino.create_naub_chain(11);
