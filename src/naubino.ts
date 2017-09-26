@@ -178,7 +178,7 @@ class Naub {
         return nodes
     }
 
-    collide_naub(other : Naub) {
+    collide_naub(other: Naub) {
         if (this.pointers.size == 0) return
         this.naubino.naub_touches_naub(this, other)
     }
@@ -272,6 +272,49 @@ class Hunter {
     }
 }
 
+class NaubColliderSystem {
+
+    naubino: Naubino
+
+    constructor(naubino: Naubino, engine: Matter.Engine) {
+        this.naubino = naubino
+        Matter.Events.on(engine, "collisionStart", (e) => this.on_collision_start(e))
+    }
+
+    on_collision_start({ name, pairs, source, timestamp }: Matter.IEventCollision<Matter.Engine>) {
+        for (const pair of pairs) {
+            const naub_a = bodyNaubMap.get(pair.bodyA.id)
+            const naub_b = bodyNaubMap.get(pair.bodyB.id)
+            if (naub_a && naub_b) {
+                naub_a.collide_naub(naub_b)
+            }
+        }
+    }
+
+    naub_touches_naub(naub_a: Naub, naub_b: Naub) {
+        if (!naub_a.merges_with(naub_b)) return false
+        if (naub_a.naubs_joints.size == 0) {
+            naub_a.join_naub(naub_b)
+            return true
+        }
+        naub_a.merge_naub(naub_b)
+        naub_b.naubino = null
+        const cycles = naub_a.find_cycles()
+        for (const cycle of cycles) {
+            this.pop_cycle(cycle)
+        }
+    }
+
+    pop_cycle(cycle: Naub[]) {
+        for (const naub of cycle) {
+            // TODO conceptualize removal
+            naub.remove()
+            this.naubino.remove_naub(naub)
+            naub.naubino = null
+        }
+    }
+}
+
 class Naubino {
     size: Vector = { x: 1, y: 1 }
 
@@ -280,22 +323,12 @@ class Naubino {
     pointers = new Set<Pointer>()
     map_naub_pointer = new Map<Naub, Pointer>();
 
-    engine: Matter.Engine = Matter.Engine.create()
+    engine = Matter.Engine.create()
+    collider = new NaubColliderSystem(this, this.engine)
 
     constructor() {
         this.engine.world.gravity.x = 0
         this.engine.world.gravity.y = 0
-        Matter.Events.on(this.engine, "collisionStart", (e) => this.on_collision_start(e))
-    }
-
-    on_collision_start({ name, pairs, source, timestamp } : Matter.IEventCollision<Matter.Engine>) {
-        for (const pair of pairs) {
-            const naub_a = bodyNaubMap.get(pair.bodyA.id)
-            const naub_b = bodyNaubMap.get(pair.bodyB.id)
-            if (naub_a && naub_b) {
-                naub_a.collide_naub(naub_b)
-            }
-        }
     }
 
     create_naub(pos?: Vector) {
@@ -436,29 +469,10 @@ class Naubino {
     }
 
     naub_touches_naub(naub_a: Naub, naub_b: Naub) {
-        if (!naub_a.merges_with(naub_b)) return false
-        if (naub_a.naubs_joints.size == 0) {
-            naub_a.join_naub(naub_b)
-            return true
-        }
-        naub_a.merge_naub(naub_b)
-        naub_b.naubino = null
-        const cycles = naub_a.find_cycles()
-        for (const cycle of cycles) {
-            this.pop_cycle(cycle)
-        }
+        this.collider.naub_touches_naub(naub_a, naub_b)
     }
 
-    pop_cycle(cycle: Naub[]) {
-        for (const naub of cycle) {
-            // TODO conceptualize removal
-            naub.remove()
-            this.remove_naub(naub)
-            naub.naubino = null
-        }
-    }
-
-    step() : Update {
+    step(): Update {
         for (const pointer of this.pointers) {
             pointer.step()
         }
