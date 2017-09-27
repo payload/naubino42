@@ -350,42 +350,19 @@ class PointerSystem {
     }
 }
 
-class Naubino {
-    size: Vector = { x: 1, y: 1 }
+class NaubFactory {
 
-    naubs = new Set<Naub>()
-    naub_joints = new Set<NaubJoint>()
+    naubino: Naubino
 
-    engine = Matter.Engine.create()
-    collider = new NaubColliderSystem(this, this.engine)
-    pointers = new PointerSystem(this, this.engine)
-
-    constructor() {
-        this.engine.world.gravity.x = 0
-        this.engine.world.gravity.y = 0
+    constructor(naubino: Naubino) {
+        this.naubino = naubino
     }
 
     create_naub(pos?: Vector) {
-        let naub = new Naub(this.engine)
+        let naub = new Naub(this.naubino.engine)
         if (pos) naub.pos = Vector.clone(pos)
-        this.add_naub(naub)
+        this.naubino.add_naub(naub)
         return naub
-    }
-
-    create_naub_joint(naub_a: Naub, naub_b: Naub) {
-        let joint = new NaubJoint(naub_a, naub_b)
-        this.add_naub_joint(joint)
-        return joint
-    }
-
-    create_pointer(pos: Vector) {
-        let pointer = new Pointer(pos)
-        this.pointers.pointers.add(pointer)
-        return pointer
-    }
-
-    remove_pointer(pointer: Pointer) {
-        this.pointers.pointers.delete(pointer)
     }
 
     create_naub_chain(n: number, chain_center: Vector = { x: 0, y: 0 }, rot: number = 0): Naub[] {
@@ -418,10 +395,51 @@ class Naubino {
 
         // join naubs
         for (let i = 0; i < naubs.length - 1; ++i) {
-            this.add_naub_joint(naubs[i].join_naub(naubs[i + 1]))
+            this.naubino.add_naub_joint(naubs[i].join_naub(naubs[i + 1]))
         }
 
         return naubs
+    }
+}
+
+class Naubino {
+    size: Vector = { x: 1, y: 1 }
+
+    naubs = new Set<Naub>()
+    naub_joints = new Set<NaubJoint>()
+
+    engine = Matter.Engine.create()
+    collider = new NaubColliderSystem(this, this.engine)
+    pointers = new PointerSystem(this, this.engine)
+    naub_fac = new NaubFactory(this)
+
+    constructor() {
+        this.engine.world.gravity.x = 0
+        this.engine.world.gravity.y = 0
+    }
+
+    create_naub(pos?: Vector) {
+        return this.naub_fac.create_naub(pos)
+    }
+
+    create_naub_chain(n: number, chain_center: Vector = { x: 0, y: 0 }, rot: number = 0): Naub[] {
+        return this.naub_fac.create_naub_chain(n, chain_center, rot)
+    }
+
+    create_naub_joint(naub_a: Naub, naub_b: Naub) {
+        let joint = new NaubJoint(naub_a, naub_b)
+        this.add_naub_joint(joint)
+        return joint
+    }
+
+    create_pointer(pos: Vector) {
+        let pointer = new Pointer(pos)
+        this.pointers.pointers.add(pointer)
+        return pointer
+    }
+
+    remove_pointer(pointer: Pointer) {
+        this.pointers.pointers.delete(pointer)
     }
 
     add_naub(naub: Naub) {
