@@ -422,35 +422,10 @@ class Naubino {
         }
 
         return naubs
-        /* python
-        pos             = Vec2d(*pos)
-        naubs           = [Naub(self) for i in xrange(n)]
-        restl           = Config.naub_joint_rest_length
-        restl           = [restl(a, b) for a, b in zip(naubs, naubs[1:])]
-        restl           = tuple(sum(restl[:i]) for i in xrange(len(restl)+1))
-        v               = Vec2d(1, 0).rotated(rot)
-        for i, naub in enumerate(naubs):
-            naub.pos    = pos + v * (-(restl[-1] * 0.5) + restl[i])
-        for a, b in zip(naubs, naubs[1:]):
-            a.join_naub(b)
-        return naubs
-        */
     }
 
     add_naub(naub: Naub) {
         this.naubs.add(naub)
-        // TODO mode.add_naub(naub), but do it with cb, different concept
-        // TODO cb.add_naub(naub)
-        /* python
-        naub.naubino = self
-    
-        if naub not in self.naubs:
-            self.naubs.append(naub)
-    
-        if self.mode: self.mode.add_naub(naub)
-    
-        self.cb.add_naub(naub)
-        */
     }
     remove_naub(naub: Naub) {
         this.naubs.delete(naub)
@@ -489,19 +464,6 @@ class Naubino {
         const bodies = this.engine.world.bodies
         const speed = _.sumBy(bodies, (body) => { return body.speed }) / bodies.length
         //console.log("world speed", speed)
-        /* python
-        for pointer in self.pointers:
-            pointer.step(dt)
-        if self.mode: self.mode.step(dt)
-        self.space.step(dt)
-        for naub in self.naubs:
-            naub.time   = naub.time + dt
-        danger = self.danger()
-        self.warn = Config.warn(danger)
-        if Config.fail(danger):
-            self.stop()
-            self.cb.fail()
-        */
         return <Update>{
             naubs: this.naubs,
             naub_joints: this.naub_joints
