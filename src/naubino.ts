@@ -460,14 +460,19 @@ class Naubino {
         for (const naub of this.naubs) {
             if (!naub.alive) this.naubs.delete(naub)
         }
-
-        const bodies = this.engine.world.bodies
-        const speed = _.sumBy(bodies, (body) => { return body.speed }) / bodies.length
-        //console.log("world speed", speed)
+        if (this.world_is_exploding()) {
+            console.warn("WARN world is exploding")
+        }
         return <Update>{
             naubs: this.naubs,
             naub_joints: this.naub_joints
         }
+    }
+
+    world_is_exploding() {
+        const bodies = this.engine.world.bodies
+        const speed = _.sumBy(bodies, (body) => { return body.speed }) / bodies.length
+        return speed > 10000
     }
 }
 
