@@ -197,10 +197,18 @@ describe("Naubino", () => {
     })
 
     describe("create_naub_chain", function () {
-        it("creates naubs and joints", () => {
+        it("creates naubs", () => {
             const chain = naubino.create_naub_chain(10);
             assert.equal(naubino.naubs.size, 10, "all naubs there")
+        })
+        it("creates naub joints", () => {
+            const chain = naubino.create_naub_chain(10);
             assert.equal(naubino.naub_joints.size, 9, "all naub_joints there")
+        })
+        it("creates physics objects", () => {
+            const chain = naubino.create_naub_chain(10);
+            assert.isAtLeast(naubino.engine.world.bodies.length, 10, "all bodies are there")
+            assert.isAtLeast(naubino.engine.world.constraints.length, 9, "all constraints are there")
         })
         it("creates naubs around 0x0 horizontally", () => {
             const chain = naubino.create_naub_chain(11);

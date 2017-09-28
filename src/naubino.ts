@@ -62,8 +62,7 @@ class Naub {
         if (fail_condition(this != other)) return
         if (!this.naubs_joints.has(other)) return
         const joint = this.naubs_joints.get(other)
-        if (joint.naubino) joint.naubino.remove_naub_joint(joint)
-        joint.naubino = null
+        joint.remove()
         this.naubs_joints.delete(other)
         other.unjoin_naub(this)
     }
@@ -163,11 +162,12 @@ class Naub {
 
 
 class NaubJoint {
-    _naubino: any = null
-    _constraint: Matter.Constraint
 
     naub_a: Naub
     naub_b: Naub
+    alive = true
+
+    constraint: Matter.Constraint
 
     constructor(naub_a: Naub, naub_b: Naub) {
         this.naub_a = naub_a
@@ -179,24 +179,18 @@ class NaubJoint {
             //damping: 0.1,
             length: naub_joint_rest_length(naub_a, naub_b)
         })
+        const { engine } = this.naub_a
+        if (engine) {
+            Matter.World.add(engine.world, this.constraint)
+        }
     }
 
-    get naubino() { return this._naubino }
-    set naubino(naubino) {
-        if (this._naubino === naubino) return
-        if (this._naubino) this._remove_from_naubino()
-        this._naubino = naubino
-        if (this._naubino) this._add_to_naubino()
-    }
-
-    _add_to_naubino() {
-        Matter.World.add(this._naubino.engine.world, this._constraint)
-        this._naubino.add_naub_joint(this)
-    }
-
-    _remove_from_naubino() {
-        Matter.World.remove(this._naubino.engine.world, this._constraint)
-        this._naubino.remove_naub_joint(this)
+    remove() {
+        this.alive = false
+        const { engine } = this.naub_a
+        if (engine) {
+            Matter.World.remove(engine.world, this.constraint)
+        }
     }
 }
 
@@ -482,6 +476,9 @@ class Naubino {
         Matter.Engine.update(this.engine)
         for (const naub of this.naubs) {
             if (!naub.alive) this.naubs.delete(naub)
+        }
+        for (const joint of this.naub_joints) {
+            if (!joint.alive) this.naub_joints.delete(joint)
         }
         if (this.world_is_exploding()) {
             console.warn("WARN world is exploding")
