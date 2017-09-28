@@ -1,5 +1,5 @@
 import { Vector } from "matter-js"
-import { Naubino, Naub, NaubJoint, Pointer, Hunter } from "./naubino"
+import { Naubino, Naub, NaubJoint, Pointer, Hunter, ArenaMode } from "./naubino"
 
 import { assert } from "chai"
 import * as _ from "lodash"
@@ -324,5 +324,22 @@ describe("Hunter", () => {
         }
         console.assert(naubino.naubs.size == 0, "postcondition: naubs == 0")
         console.assert(naubino.pointers.pointers.size == 0, "postcondition: pointers == 0")
+    })
+})
+
+describe("ArenaMode", function () {
+    let naubino: Naubino
+    let arena_mode: ArenaMode
+
+    beforeEach(function () {
+        naubino = new Naubino()
+        naubino.size = { x: 200, y: 200 }
+        arena_mode = new ArenaMode(naubino)
+    })
+    describe("constructor", function () {
+        it("checks parameters", function () {
+            assert.doesNotThrow(() => new ArenaMode(naubino))
+            assert.throws(() => new ArenaMode(null))
+        })
     })
 })
