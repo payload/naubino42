@@ -348,5 +348,13 @@ describe("ArenaMode", function () {
             assert.isTrue(naubino.naubs.has(naubs[0]), "naub 0 in naubino")
             assert.isTrue(naubino.naubs.has(naubs[1]), "naub 1 in naubino")
         })
+        it("positions naubs outside", function () {
+            for (let i = 0; i < 10; i++) {
+                for (const naub of arena_mode.spam_naub_pair()) {
+                    assert.isTrue(naub.pos.x < 0 || naub.pos.x > naubino.size.x, "naub x outside")
+                    assert.isTrue(naub.pos.y < 0 || naub.pos.y > naubino.size.y, "naub y outside")
+                }
+            }
+        })
     })
 })
