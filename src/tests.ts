@@ -342,4 +342,11 @@ describe("ArenaMode", function () {
             assert.throws(() => new ArenaMode(null))
         })
     })
+    describe("spam_naub_pair", function () {
+        it("creates pair of naubs", function () {
+            const naubs = arena_mode.spam_naub_pair()
+            assert.isTrue(naubino.naubs.has(naubs[0]), "naub 0 in naubino")
+            assert.isTrue(naubino.naubs.has(naubs[1]), "naub 1 in naubino")
+        })
+    })
 })
