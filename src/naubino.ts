@@ -523,10 +523,14 @@ class Pointer {
 }
 
 class ArenaMode {
+    _naubino: Naubino
     constructor(naubino: Naubino) {
         console.assert(naubino)
+        this._naubino = naubino
     }
-    spam_naub_pair(): Naub[] { return [] }
+    spam_naub_pair(): Naub[] {
+        return this._naubino.create_naub_chain(2)
+    }
 }
 
 export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update, ArenaMode }
