@@ -522,4 +522,11 @@ class Pointer {
     }
 }
 
-export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update }
+class ArenaMode {
+    constructor(naubino: Naubino) {
+        console.assert(naubino)
+    }
+    spam_naub_pair(): Naub[] { return [] }
+}
+
+export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update, ArenaMode }
