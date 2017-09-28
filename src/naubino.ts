@@ -166,8 +166,13 @@ class NaubJoint {
     _naubino: any = null
     _constraint: Matter.Constraint
 
+    naub_a: Naub
+    naub_b: Naub
+
     constructor(naub_a: Naub, naub_b: Naub) {
-        this._constraint = Matter.Constraint.create({
+        this.naub_a = naub_a
+        this.naub_b = naub_b
+        this.constraint = Matter.Constraint.create({
             bodyA: naub_a.body,
             bodyB: naub_b.body,
             //stiffness: 2,

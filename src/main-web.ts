@@ -44,13 +44,11 @@ function main_loop() {
 
     ctx.fillStyle = "black"
     for (const joint of update.naub_joints) {
-        const x1 = joint._constraint.bodyA.position.x
-        const y1 = joint._constraint.bodyA.position.y
-        const x2 = joint._constraint.bodyB.position.x
-        const y2 = joint._constraint.bodyB.position.y
+        const { x: xa, y: ya } = joint.naub_a.pos
+        const { x: xb, y: yb } = joint.naub_b.pos
         ctx.beginPath()
-        ctx.moveTo(x1, y1)
-        ctx.lineTo(x2, y2)
+        ctx.moveTo(xa, ya)
+        ctx.lineTo(xb, yb)
         ctx.closePath()
         ctx.stroke()
     }
