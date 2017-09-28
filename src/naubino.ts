@@ -48,14 +48,6 @@ class Naub {
         this.naubs_joints.set(other, joint)
         other.join_naub(this, joint)
         return joint
-        /* python
-        if fail_condition(self.alive and naub.alive): return
-        if not joint:
-            joint = NaubJoint(self, naub, self.naubino)
-        if naub not in self.naubs_joints:
-            self.naubs_joints[naub] = joint
-            naub.join_naub(self, joint)
-        */
     }
 
     unjoin_naub(other: Naub) {
