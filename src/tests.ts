@@ -351,10 +351,23 @@ describe("ArenaMode", function () {
         it("positions naubs outside", function () {
             for (let i = 0; i < 10; i++) {
                 for (const naub of arena_mode.spam_naub_pair()) {
-                    assert.isTrue(naub.pos.x < 0 || naub.pos.x > naubino.size.x, "naub x outside")
-                    assert.isTrue(naub.pos.y < 0 || naub.pos.y > naubino.size.y, "naub y outside")
+                    assert.isTrue(
+                        naub.pos.x < 0 || naub.pos.x > naubino.size.x ||
+                        naub.pos.y < 0 || naub.pos.y > naubino.size.y,
+                        `naub y ${naub.pos.y} outside [0,${naubino.size.y}]\n` +
+                        `naub x ${naub.pos.x} outside [0,${naubino.size.x}]`)
                 }
             }
         })
+        it("positions naub pairs randomly", function () {
+            const coords = []
+            for (let i = 0; i < 10; i++) {
+                for (const naub of arena_mode.spam_naub_pair()) {
+                    coords.push(naub.pos.x, naub.pos.y)
+                }
+            }
+            assert.isAtLeast(_.uniq(coords).length, 15, "random naub positions")
+        })
+
     })
 })
