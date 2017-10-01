@@ -530,11 +530,19 @@ class ArenaMode {
     }
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
-        const rot = 2 * Math.PI * Math.random()
-        return this._naubino.create_naub_chain(2, pos, rot)
+        //const rot = 2 * Math.PI * Math.random()
+        return this._naubino.create_naub_chain(2, pos)
     }
     random_naub_pos(): Vector {
-        return { x: -10, y: -10 }
+        const { sin, cos, max, random, PI } = Math
+        const { x, y } = this._naubino.size
+        const magic = 5
+        const radius = Math.sqrt(x * x + y * y) / 2
+        const angle = random() * 2 * PI
+        return {
+            x: (cos(angle) * (radius + magic) + x/2),
+            y: (sin(angle) * (radius + magic) + y/2)
+        }
     }
 }
 
