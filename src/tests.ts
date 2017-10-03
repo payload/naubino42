@@ -277,6 +277,28 @@ describe("Naubino", () => {
     })
 })
 
+class ScenarioPopNaubChainsClearsNaubino {
+    naubino: Naubino
+    hunters = new Array<Hunter>()
+    constructor(naubino: Naubino) {
+        this.naubino = naubino
+        const chain_a = naubino.create_naub_chain(100, { x: 0, y: -10 })
+        const chain_b = naubino.create_naub_chain(100, { x: 0, y: 10 })
+        const hunter_0 = new Hunter(naubino, chain_a[0], chain_b[0])
+        const hunter_1 = new Hunter(naubino, chain_a[chain_a.length - 1], chain_b[chain_b.length - 1])
+        this.hunters.push(hunter_0, hunter_1)
+    }
+    run() {
+        for (let i = 0; i < 500 && this.hunters.length > 0; ++i) {
+            this.hunters = this.hunters.filter((hunter) => {
+                hunter.step()
+                return !hunter.finished
+            })
+            this.naubino.step()
+        }
+    }
+}
+
 describe("Hunter", () => {
     let naubino: Naubino;
 
@@ -299,29 +321,9 @@ describe("Hunter", () => {
         console.assert(naub_a.pos.x > -10)
     })
 
-    it("connecting naub chains leaves nothing behind", () => {
-        let chain_a = naubino.create_naub_chain(100, { x: 0, y: -10 })
-        let chain_b = naubino.create_naub_chain(100, { x: 0, y: 10 })
-
-        let chain_naubs = chain_a.concat(chain_b)
-        for (let naub of chain_naubs) {
-            naubino.add_naub(naub)
-        }
-        console.assert(naubino.naubs.size == 200)
-        naubino.step()
-        console.assert(naubino.engine.world.bodies.length >= 200)
-
-        let hunter_0 = new Hunter(naubino, chain_a[0], chain_b[0])
-        let hunter_1 = new Hunter(naubino, chain_a[chain_a.length - 1], chain_b[chain_b.length - 1])
-
-        let hunters = [hunter_0, hunter_1]
-        for (let i = 0; i < 500 && hunters.length > 0; ++i) {
-            hunters = hunters.filter((hunter) => {
-                hunter.step()
-                return !hunter.finished
-            })
-            naubino.step()
-        }
+    it("pop naub chains clears naubino", () => {
+        const scene = new ScenarioPopNaubChainsClearsNaubino(naubino)
+        scene.run()
         console.assert(naubino.naubs.size == 0, "postcondition: naubs == 0")
         console.assert(naubino.pointers.pointers.size == 0, "postcondition: pointers == 0")
     })
