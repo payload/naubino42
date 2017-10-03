@@ -429,4 +429,12 @@ describe("ArenaMode", function () {
             assert.isBelow(dist_after[1], dist_before[1] - 1, `naub 1 distance to center gets lower`)
         })
     })
+    describe("step", function () {
+        it("spams naubs over time", function () {
+            const before = naubino.naubs.size
+            _.times(60 * 5, () => arena_mode.step())
+            const after = naubino.naubs.size
+            assert.isAbove(after, before, "more naubs than before")
+        })
+    })
 })

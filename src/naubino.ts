@@ -1,4 +1,5 @@
 import { fail_condition } from "./utils"
+import { Timer } from "./timer"
 
 import * as Matter from "matter-js"
 import { Vector } from "matter-js"
@@ -531,6 +532,7 @@ class Pointer {
 class ArenaMode {
     _naubino: Naubino
     _center = Matter.Body.create({})
+    _spammer = new Timer(1, () => this.spam_naub_pair()).start()
     constructor(naubino: Naubino) {
         console.assert(naubino)
         this._naubino = naubino
@@ -565,6 +567,9 @@ class ArenaMode {
     }
     center_pos() {
         return this._center.position
+    }
+    step() {
+        this._spammer.step(60 / 1)
     }
 }
 
