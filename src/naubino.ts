@@ -531,14 +531,10 @@ class Pointer {
 
 class ArenaMode {
     _naubino: Naubino
-    _center = Matter.Body.create({})
     _spammer = new Timer(1, () => this.spam_naub_pair()).start()
     constructor(naubino: Naubino) {
         console.assert(naubino)
         this._naubino = naubino
-        Matter.Body.setStatic(this._center, true)
-        Matter.Body.setPosition(this._center, Vector.mult(this._naubino.size, 0.5))
-        Matter.World.add(this._naubino.engine.world, this._center)
     }
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
@@ -547,8 +543,10 @@ class ArenaMode {
         for (const naub of naubs) {
             const constraint = Matter.Constraint.create({
                 bodyA: naub.body,
-                bodyB: this._center,
-                length: 1
+                pointB: this.center_pos(),
+                length: 0,
+                damping: 0.3,
+                stiffness: 0.001
             })
             Matter.World.add(this._naubino.engine.world, constraint)
         }
@@ -566,7 +564,7 @@ class ArenaMode {
         }
     }
     center_pos() {
-        return this._center.position
+        return Vector.mult(this._naubino.size, 0.5)
     }
     step() {
         this._spammer.step(60 / 1)

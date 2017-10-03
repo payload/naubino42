@@ -156,7 +156,7 @@ describe("Naubino", () => {
     describe("on naub_naub_collision", function () {
         it("calls on collision", function () {
             const naub_a = naubino.create_naub({ x: 0, y: 0 });
-            const naub_b = naubino.create_naub({ x: naub_a.radius*2+0.1, y: 0 })
+            const naub_b = naubino.create_naub({ x: naub_a.radius * 2 + 0.1, y: 0 })
             Matter.Body.applyForce(naub_a.body, naub_a.body.position, { x: 0.01, y: 0 })
             let called = 0
             naubino.ee.on("naub_naub_collision", () => ++called)
@@ -419,7 +419,7 @@ describe("ArenaMode", function () {
         it("naub pair moves towards center", function () {
             const distanceToCenter = (pos: Vector) => {
                 const diff = Vector.sub(arena_mode.center_pos(), pos)
-                return Vector.magnitudeSquared(diff)
+                return Vector.magnitude(diff)
             }
             const naubs = arena_mode.spam_naub_pair()
             const dist_before = _.map(naubs, (naub) => distanceToCenter(naub.pos))
@@ -427,6 +427,18 @@ describe("ArenaMode", function () {
             const dist_after = _.map(naubs, (naub) => distanceToCenter(naub.pos))
             assert.isBelow(dist_after[0], dist_before[0] - 1, `naub 0 distance to center gets lower`)
             assert.isBelow(dist_after[1], dist_before[1] - 1, `naub 1 distance to center gets lower`)
+        })
+        it("naub pair approaches center in 5 seconds", function () {
+            const distanceToCenter = (pos: Vector) => {
+                const diff = Vector.sub(arena_mode.center_pos(), pos)
+                return Vector.magnitude(diff)
+            }
+            const naubs = arena_mode.spam_naub_pair()
+            const dist_before = _.map(naubs, (naub) => distanceToCenter(naub.pos))
+            _.times(60 * 5, () => naubino.step())
+            const dist_after = _.map(naubs, (naub) => distanceToCenter(naub.pos))
+            assert.isBelow(dist_after[0], dist_before[0] * 0.1, `naub 0 distance to center gets lower`)
+            assert.isBelow(dist_after[1], dist_before[1] * 0.1, `naub 1 distance to center gets lower`)
         })
     })
     describe("step", function () {
