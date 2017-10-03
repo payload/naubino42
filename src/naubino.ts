@@ -3,6 +3,7 @@ import { fail_condition } from "./utils"
 import * as Matter from "matter-js"
 import { Vector } from "matter-js"
 import * as _ from "lodash"
+import { EventEmitter } from "eventemitter3"
 
 function naub_joint_rest_length(a: Naub, b: Naub) {
     return (a.radius + b.radius) * 2
@@ -20,7 +21,7 @@ class Naub {
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
     pointers = new Set<Pointer>()
-    body = Matter.Bodies.circle(0, 0, this._radius)
+    body = Matter.Bodies.circle(0, 0, this._radius, { density: 1 })
     color = "red"
     cycle_check = 0
     cycle_number = 0
@@ -243,6 +244,7 @@ class Hunter {
 class NaubColliderSystem {
 
     naubino: Naubino
+    ee = new EventEmitter()
 
     constructor(naubino: Naubino, engine: Matter.Engine) {
         this.naubino = naubino
@@ -254,6 +256,7 @@ class NaubColliderSystem {
             const naub_a = bodyNaubMap.get(pair.bodyA.id)
             const naub_b = bodyNaubMap.get(pair.bodyB.id)
             if (naub_a && naub_b) {
+                this.ee.emit("naub_naub_collision", naub_a, naub_b, pair)
                 if (naub_a.pointers.size > 0) {
                     this.naub_touches_naub(naub_a, naub_b)
                 }
@@ -408,10 +411,12 @@ class Naubino {
     collider = new NaubColliderSystem(this, this.engine)
     pointers = new PointerSystem(this, this.engine)
     naub_fac = new NaubFactory(this)
+    ee = new EventEmitter()
 
     constructor() {
         this.engine.world.gravity.x = 0
         this.engine.world.gravity.y = 0
+        this.collider.ee.on("naub_naub_collision", (...args) => this.ee.emit("naub_naub_collision", ...args))
     }
 
     create_naub(pos?: Vector) {
