@@ -521,8 +521,12 @@ class Pointer {
         Vector.add(this.pos, to_move, this.pos)
     }
 
+    moveTo(pos: Vector) {
+        this.pos = pos
+    }
+
     step() {
-        const body_pos = Vector_interpolate_to(this.body.position, this.pos, 0.25)
+        const body_pos = Vector_interpolate_to(this.body.position, this.pos, 1)
         this.body.velocity = Matter.Vector.sub(body_pos, this.body.position)
         this.body.position = body_pos
     }
