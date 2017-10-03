@@ -43,6 +43,7 @@ function main_loop() {
     for (const joint of update.naub_joints) {
         const { x: xa, y: ya } = joint.naub_a.pos
         const { x: xb, y: yb } = joint.naub_b.pos
+        ctx.lineWidth = joint.naub_a.radius * 0.212 * 2
         ctx.beginPath()
         ctx.moveTo(xa, ya)
         ctx.lineTo(xb, yb)

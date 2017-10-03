@@ -6,10 +6,6 @@ import { Vector } from "matter-js"
 import * as _ from "lodash"
 import { EventEmitter } from "eventemitter3"
 
-function naub_joint_rest_length(a: Naub, b: Naub) {
-    return (a.radius + b.radius) * 2
-}
-
 class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
@@ -18,7 +14,7 @@ class Update {
 const bodyNaubMap = new Map<number, Naub>();
 
 class Naub {
-    _radius = 1
+    _radius = 10
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
     pointers = new Set<Pointer>()
@@ -169,12 +165,15 @@ class NaubJoint {
         this.constraint = Matter.Constraint.create({
             bodyA: naub_a.body,
             bodyB: naub_b.body,
-            //stiffness: 2,
-            //damping: 0.1,
-            length: naub_joint_rest_length(naub_a, naub_b)
+            stiffness: 0.05,
+            length: NaubJoint.targetLength(this.naub_a, this.naub_b)
         })
         const { engine } = this.naub_a
         Matter.World.add(engine.world, this.constraint)
+    }
+
+    static targetLength(naub_a: Naub, naub_b: Naub) {
+        return naub_a.radius + naub_b.radius * 2
     }
 
     remove() {
@@ -367,7 +366,7 @@ class NaubFactory {
         // distance between each naub pair
         let rest_lens = []
         for (let i = 0; i < naubs.length - 1; ++i) {
-            const rest_len = naub_joint_rest_length(naubs[i], naubs[i + 1])
+            const rest_len = NaubJoint.targetLength(naubs[i], naubs[i + 1])
             rest_lens.push(rest_len)
         }
 
