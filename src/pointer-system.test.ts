@@ -44,10 +44,27 @@ describe("PointerSystem", function () {
         })
     })
     describe("connect_pointer_naub", function () {
-        it("connects naub", function () {
+        it("creates pointer when applied on naub", function () {
             const naub_a = naubino.create_naub({ x: 10, y: 10 })
-            const pointer = naubino.connect_pointer_naub(naub_a)
-            assert(pointer)
+            const pointer = system.connect_pointer_naub(naub_a)
+            assert.ok(pointer)
+        })
+    })
+    describe("touch_down", function () {
+        it("creates pointer when applied on naub pos", function () {
+            const naub_a = naubino.create_naub({ x: 10, y: 10 })
+            const pointer = system.touch_down(naub_a.pos)
+            assert.ok(pointer)
+        })
+    })
+    describe("Pointer", function () {
+        it("gets removed when naub removes", function () {
+            const naub_a = naubino.create_naub({ x: 10, y: 10 })
+            const pointer = system.touch_down(naub_a.pos)
+            assert.ok(system.pointers.has(pointer), "pointer created")
+            naub_a.remove()
+            system.step()
+            assert.notOk(system.pointers.has(pointer), "pointer removed")
         })
     })
 })

@@ -67,12 +67,15 @@ class Naub {
     }
 
     remove() {
-        // TODO remove registered pointers
         this.alive = false
         bodyNaubMap.delete(this.body.id)
-        this.naubs_joints.forEach((joint, naub) => {
+        for (const [naub, _] of this.naubs_joints) {
             this.unjoin_naub(naub)
-        })
+        }
+        for (const pointer of this.pointers) {
+            pointer.remove()
+        }
+        this.pointers.clear()
         Matter.World.remove(this.engine.world, this.body)
     }
 
@@ -330,6 +333,7 @@ class PointerSystem {
         // TODO map_naub_pointer unused
         this.map_naub_pointer.set(naub, pointer)
         naub.pointers.add(pointer)
+        this.pointers.add(pointer)
         return pointer
     }
 
@@ -341,6 +345,9 @@ class PointerSystem {
     step() {
         for (const pointer of this.pointers) {
             pointer.step()
+        }
+        for (const pointer of this.pointers) {
+            if (!pointer.alive) this.remove_pointer(pointer)
         }
     }
 }
@@ -506,6 +513,7 @@ class Pointer {
     body = Matter.Body.create({})
     pos: Vector
     constraint: Matter.Constraint
+    alive = true
 
     constructor(pos: Vector) {
         Matter.Body.setStatic(this.body, true)
@@ -513,8 +521,12 @@ class Pointer {
         this.pos = pos
     }
 
+    remove() {
+        this.alive = false
+    }
+
     up() {
-        // TODO unregister from naub
+        this.remove()
     }
 
     move(to_move: Vector) {
