@@ -549,8 +549,7 @@ class ArenaMode {
                 bodyA: naub.body,
                 pointB: this.center_pos(),
                 length: 0,
-                damping: 0.3,
-                stiffness: 0.001
+                stiffness: 0.00001
             })
             Matter.World.add(this._naubino.engine.world, constraint)
         }
@@ -559,7 +558,7 @@ class ArenaMode {
     random_naub_pos(): Vector {
         const { sin, cos, max, random, PI } = Math
         const { x, y } = this._naubino.size
-        const magic = 5
+        const magic = 20
         const radius = Math.sqrt(x * x + y * y) / 2
         const angle = random() * 2 * PI
         return {
