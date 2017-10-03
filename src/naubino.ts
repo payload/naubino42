@@ -578,4 +578,4 @@ class ArenaMode {
     }
 }
 
-export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update, ArenaMode }
+export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update, ArenaMode, PointerSystem }

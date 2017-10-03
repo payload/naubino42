@@ -5,15 +5,6 @@ import { Naubino, Naub, NaubJoint, Pointer, Hunter, ArenaMode } from "./naubino"
 import { assert } from "chai"
 import * as _ from "lodash"
 
-describe("Pointer", () => {
-    it("moves", () => {
-        const pointer = new Pointer({ x: 0, y: 0 })
-        pointer.pos = { x: 10, y: 0 }
-        pointer.step()
-        console.assert(pointer.body.position.x > 0)
-    })
-})
-
 describe("Naub", function () {
     let naub_a: Naub
     let naub_b: Naub
@@ -91,27 +82,6 @@ describe("Naubino", () => {
         naubino.size = { x: 200, y: 200 }
     })
 
-    describe("find_naub", function () {
-        let naub_a: Naub
-        let naub_b: Naub
-        beforeEach(function () {
-            naub_a = naubino.create_naub({ x: 10, y: 10 })
-            naub_b = naubino.create_naub({ x: -10, y: -10 })
-        })
-        it("finds naub at naub center", function () {
-            const naub = naubino.find_naub(naub_a.pos)
-            assert.equal(naub, naub_a)
-        })
-        it("finds naub near border", function () {
-            const naub = naubino.find_naub({ x: naub_a.pos.x + naub_a.radius * 0.9, y: naub_a.pos.y })
-            assert.equal(naub, naub_a)
-        })
-        it("finds nothing at nothing", function () {
-            const naub = naubino.find_naub({ x: -20, y: 0 })
-            assert.isNull(naub)
-        })
-    })
-
     describe("naub_touches_naub", function () {
         it("join two single naubs", function () {
             const naub_a = naubino.create_naub();
@@ -166,11 +136,6 @@ describe("Naubino", () => {
     })
 
     describe("Pointer and Naubs", function () {
-        it("connects naub", function () {
-            const naub_a = naubino.create_naub({ x: 10, y: 10 })
-            const pointer = naubino.connect_pointer_naub(naub_a)
-            assert(pointer)
-        })
         it("moves naub", function () {
             const x_before = 10
             const naub_a = naubino.create_naub({ x: x_before, y: 10 })
