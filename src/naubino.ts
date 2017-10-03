@@ -28,9 +28,9 @@ class Naub {
     id = Math.random()
     engine: Matter.Engine
 
-    constructor(engine?: Matter.Engine) {
+    constructor(engine: Matter.Engine) {
         this.engine = engine
-        if (this.engine) Matter.World.add(this.engine.world, this.body)
+        Matter.World.add(this.engine.world, this.body)
         bodyNaubMap.set(this.body.id, this)
     }
 
@@ -76,7 +76,7 @@ class Naub {
         this.naubs_joints.forEach((joint, naub) => {
             this.unjoin_naub(naub)
         })
-        if (this.engine) Matter.World.remove(this.engine.world, this.body)
+        Matter.World.remove(this.engine.world, this.body)
     }
 
     is_joined(other: Naub) {
@@ -173,17 +173,13 @@ class NaubJoint {
             length: naub_joint_rest_length(naub_a, naub_b)
         })
         const { engine } = this.naub_a
-        if (engine) {
-            Matter.World.add(engine.world, this.constraint)
-        }
+        Matter.World.add(engine.world, this.constraint)
     }
 
     remove() {
         this.alive = false
         const { engine } = this.naub_a
-        if (engine) {
-            Matter.World.remove(engine.world, this.constraint)
-        }
+        Matter.World.remove(engine.world, this.constraint)
     }
 }
 
