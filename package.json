@@ -29,7 +29,6 @@
     "chai": "*",
     "mocha": "*",
     "source-map-support": "^0.4.18",
-    "ts-mocha": "^1.0.3",
     "ts-node": "^3.3.0",
     "typescript": "*"
   },
