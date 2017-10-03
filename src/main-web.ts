@@ -1,6 +1,9 @@
+import { Naubino, Naub, Hunter, Update, ArenaMode, Pointer } from "./naubino"
+
 import * as _ from "lodash"
 import { Vector } from "matter-js"
-import { Naubino, Naub, Hunter, Update, ArenaMode } from "./naubino"
+
+require("pepjs")
 
 let naubino: Naubino
 let mode: ArenaMode
@@ -15,11 +18,33 @@ window.addEventListener("load", () => {
     }, 1000)
 })
 
+const pointerMap = new Map<number, Pointer>()
+
 function canvas_init() {
     canvas = <HTMLCanvasElement>document.querySelector("#naubino42")
     const ctx = canvas.getContext("2d")
     ctx.fillStyle = "black"
     ctx.fillText("naubino", canvas.width / 2, canvas.height / 2)
+
+    canvas.addEventListener("pointerdown", (ev) => {
+        const pointer = naubino.touch_down({ x: ev.x, y: ev.y })
+        if (pointer) {
+            pointerMap.set(ev.pointerId, pointer)
+        }
+    })
+    canvas.addEventListener("pointermove", (ev) => {
+        const pointer = pointerMap.get(ev.pointerId)
+        if (pointer) {
+            pointer.moveTo({ x: ev.x, y: ev.y })
+        }
+    })
+    canvas.addEventListener("pointerup", (ev) => {
+        const pointer = pointerMap.get(ev.pointerId)
+        if (pointer) {
+            pointer.up()
+            pointerMap.delete(ev.pointerId)
+        }
+    })
 }
 
 function naubino_init() {
