@@ -530,11 +530,16 @@ class Pointer {
 }
 
 class ArenaMode {
+    max_naubs = 80
     _naubino: Naubino
-    _spammer = new Timer(1, () => this.spam_naub_pair()).start()
+    _spammer = new Timer(3, () => this.spam_naub_bunch()).start()
     constructor(naubino: Naubino) {
         console.assert(naubino)
         this._naubino = naubino
+    }
+    spam_naub_bunch(): Naub[] {
+        if (this._naubino.naubs.size > this.max_naubs - 2) return
+        this.spam_naub_pair()
     }
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
