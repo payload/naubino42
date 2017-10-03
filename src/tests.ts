@@ -277,6 +277,25 @@ describe("Naubino", () => {
     })
 })
 
+class WorldState {
+    state: number[]
+    constructor(world: Matter.World) {
+        this.state = [world.bodies.length, world.constraints.length, world.composites.length]
+    }
+    someGt(other: WorldState) {
+        return _.some(_.zip(this.state, other.state), ([a, b]) => _.gt(a, b))
+    }
+    allGte(other: WorldState) {
+        return _.every(_.zip(this.state, other.state), ([a, b]) => _.gte(a, b))
+    }
+    eq(other: WorldState) {
+        return _.every(_.zip(this.state, other.state), ([a, b]) => _.eq(a, b))
+    }
+    toString() {
+        return JSON.stringify(_.zipObject("bodies constraints composites".split(" "), this.state))
+    }
+}
+
 class ScenarioPopNaubChainsClearsNaubino {
     naubino: Naubino
     hunters = new Array<Hunter>()
@@ -326,6 +345,18 @@ describe("Hunter", () => {
         scene.run()
         console.assert(naubino.naubs.size == 0, "postcondition: naubs == 0")
         console.assert(naubino.pointers.pointers.size == 0, "postcondition: pointers == 0")
+    })
+
+    it("pop naub chains clears physics", () => {
+        const world = naubino.engine.world
+        const before = new WorldState(world)
+        const scene = new ScenarioPopNaubChainsClearsNaubino(naubino)
+        const in_scene = new WorldState(world)
+        assert.ok(in_scene.someGt(before), "some physics objects created")
+        assert.ok(in_scene.allGte(before), "no physics objects gone")
+        scene.run()
+        const after = new WorldState(world)
+        assert.ok(after.eq(before), `number of physics objects as before\nbefore ${before}\nafter ${after}`)
     })
 })
 

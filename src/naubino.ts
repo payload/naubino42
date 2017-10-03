@@ -334,6 +334,11 @@ class PointerSystem {
         return pointer
     }
 
+    remove_pointer(pointer: Pointer) {
+        this.pointers.delete(pointer)
+        Matter.World.remove(this.engine.world, pointer.constraint)
+    }
+
     step() {
         for (const pointer of this.pointers) {
             pointer.step()
@@ -430,7 +435,7 @@ class Naubino {
     }
 
     remove_pointer(pointer: Pointer) {
-        this.pointers.pointers.delete(pointer)
+        this.pointers.remove_pointer(pointer)
     }
 
     add_naub(naub: Naub) {
