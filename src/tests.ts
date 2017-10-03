@@ -1,3 +1,4 @@
+import * as Matter from "matter-js"
 import { Vector } from "matter-js"
 import { Naubino, Naub, NaubJoint, Pointer, Hunter, ArenaMode } from "./naubino"
 
@@ -147,6 +148,18 @@ describe("Naubino", () => {
             for (const naub of naubs_a.concat(naubs_b)) {
                 assert.isFalse(naub.alive, "naub alive")
             }
+        })
+    })
+
+    describe("on naub_naub_collision", function () {
+        it("calls on collision", function () {
+            const naub_a = naubino.create_naub({ x: 0, y: 0 });
+            const naub_b = naubino.create_naub({ x: naub_a.radius*2+0.1, y: 0 })
+            Matter.Body.applyForce(naub_a.body, naub_a.body.position, { x: 0.01, y: 0 })
+            let called = 0
+            naubino.ee.on("naub_naub_collision", () => ++called)
+            _.times(10, () => naubino.step())
+            assert.equal(called, 1, "called once")
         })
     })
 
