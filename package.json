@@ -6,8 +6,7 @@
     "build": "npm run build-ts",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "test": "ts-mocha src/tests.ts",
-    "test-js": "mocha dist/tests",
+    "test": "nyc mocha",
     "watchify": "watchify dist/main-web.js -o dist/main-web.browserify.js",
     "browserify": "browserify dist/main-web.js -o dist/main-web.browserify.js"
   },
@@ -18,6 +17,7 @@
     "eventemitter3": "^2.0.3",
     "lodash": "*",
     "matter-js": "https://github.com/payload/matter-js.git",
+    "nyc": "^11.2.1",
     "watchify": "*"
   },
   "devDependencies": {
@@ -28,7 +28,26 @@
     "@types/node": "*",
     "chai": "*",
     "mocha": "*",
+    "source-map-support": "^0.4.18",
     "ts-mocha": "^1.0.3",
+    "ts-node": "^3.3.0",
     "typescript": "*"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "all": true
   }
 }
