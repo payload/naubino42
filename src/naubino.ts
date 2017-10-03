@@ -524,14 +524,27 @@ class Pointer {
 
 class ArenaMode {
     _naubino: Naubino
+    _center = Matter.Body.create({})
     constructor(naubino: Naubino) {
         console.assert(naubino)
         this._naubino = naubino
+        Matter.Body.setStatic(this._center, true)
+        Matter.Body.setPosition(this._center, Vector.mult(this._naubino.size, 0.5))
+        Matter.World.add(this._naubino.engine.world, this._center)
     }
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
         //const rot = 2 * Math.PI * Math.random()
-        return this._naubino.create_naub_chain(2, pos)
+        const naubs = this._naubino.create_naub_chain(2, pos)
+        for (const naub of naubs) {
+            const constraint = Matter.Constraint.create({
+                bodyA: naub.body,
+                bodyB: this._center,
+                length: 1
+            })
+            Matter.World.add(this._naubino.engine.world, constraint)
+        }
+        return naubs
     }
     random_naub_pos(): Vector {
         const { sin, cos, max, random, PI } = Math
@@ -540,9 +553,12 @@ class ArenaMode {
         const radius = Math.sqrt(x * x + y * y) / 2
         const angle = random() * 2 * PI
         return {
-            x: (cos(angle) * (radius + magic) + x/2),
-            y: (sin(angle) * (radius + magic) + y/2)
+            x: (cos(angle) * (radius + magic) + x / 2),
+            y: (sin(angle) * (radius + magic) + y / 2)
         }
+    }
+    center_pos() {
+        return this._center.position
     }
 }
 
