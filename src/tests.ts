@@ -444,9 +444,16 @@ describe("ArenaMode", function () {
     describe("step", function () {
         it("spams naubs over time", function () {
             const before = naubino.naubs.size
-            _.times(60 * 5, () => arena_mode.step())
+            _.times(60 * 10, () => arena_mode.step())
             const after = naubino.naubs.size
             assert.isAbove(after, before, "more naubs than before")
+        })
+        it("spams not too much naubs", function () {
+            const max_naubs = 80
+            arena_mode.max_naubs = max_naubs
+            naubino.create_naub_chain(max_naubs - 1)
+            _.times(60 * 10, () => arena_mode.step())
+            assert.isAtMost(naubino.naubs.size, max_naubs, `at most ${max_naubs} naubs`)
         })
     })
 })
