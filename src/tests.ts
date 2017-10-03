@@ -368,6 +368,17 @@ describe("ArenaMode", function () {
             }
             assert.isAtLeast(_.uniq(coords).length, 15, "random naub positions")
         })
-
+        it("naub pair moves towards center", function () {
+            const distanceToCenter = (pos: Vector) => {
+                const diff = Vector.sub(arena_mode.center_pos(), pos)
+                return Vector.magnitudeSquared(diff)
+            }
+            const naubs = arena_mode.spam_naub_pair()
+            const dist_before = _.map(naubs, (naub) => distanceToCenter(naub.pos))
+            _.times(20, () => naubino.step())
+            const dist_after = _.map(naubs, (naub) => distanceToCenter(naub.pos))
+            assert.isBelow(dist_after[0], dist_before[0] - 1, `naub 0 distance to center gets lower`)
+            assert.isBelow(dist_after[1], dist_before[1] - 1, `naub 1 distance to center gets lower`)
+        })
     })
 })
