@@ -6,11 +6,13 @@ import * as _ from "lodash"
 import { assert } from "chai"
 
 describe("Pointer", () => {
-    it("moves", () => {
-        const pointer = new Pointer({ x: 0, y: 0 })
-        pointer.pos = { x: 10, y: 0 }
-        pointer.step()
-        console.assert(pointer.body.position.x > 0)
+    describe("step", function () {
+        it("moves when pos is set", () => {
+            const pointer = new Pointer({ x: 0, y: 0 })
+            pointer.pos = { x: 10, y: 0 }
+            pointer.step()
+            assert.isAbove(pointer.body.position.x, 0)
+        })
     })
 })
 
