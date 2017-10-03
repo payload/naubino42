@@ -18,8 +18,9 @@ describe("Naub", function () {
     let naub_a: Naub
     let naub_b: Naub
     beforeEach(function () {
-        naub_a = new Naub()
-        naub_b = new Naub()
+        const engine = Matter.Engine.create()
+        naub_a = new Naub(engine)
+        naub_b = new Naub(engine)
     })
     describe("is_joined", function () {
         it("default false", function () {
@@ -62,8 +63,9 @@ describe("Naub", function () {
     })
     describe("merge_naub", function () {
         beforeEach(function () {
-            naub_b.join_naub(new Naub())
-            naub_b.join_naub(new Naub())
+            const engine = Matter.Engine.create()
+            naub_b.join_naub(new Naub(engine))
+            naub_b.join_naub(new Naub(engine))
         })
         it("kills other naub", function () {
             naub_a.merge_naub(naub_b)
