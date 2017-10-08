@@ -1,7 +1,7 @@
 import { Naubino, Naub, Hunter, Update, ArenaMode, Pointer } from "./naubino"
+import { Vector, Matter } from "./matter-js"
 
 import * as _ from "lodash"
-import { Vector } from "matter-js"
 
 require("pepjs")
 
