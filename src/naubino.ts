@@ -292,6 +292,7 @@ class PointerSystem {
     engine: Matter.Engine
     pointers = new Set<Pointer>()
     map_naub_pointer = new Map<Naub, Pointer>();
+    ee = new EventEmitter()
 
     constructor(naubino: Naubino, engine: Matter.Engine) {
         this.naubino = naubino
@@ -340,6 +341,7 @@ class PointerSystem {
     remove_pointer(pointer: Pointer) {
         this.pointers.delete(pointer)
         Matter.World.remove(this.engine.world, pointer.constraint)
+        this.ee.emit("remove_pointer", pointer)
     }
 
     step() {
