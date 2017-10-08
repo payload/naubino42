@@ -15,9 +15,11 @@ describe("PointerSystem", function () {
     describe("find_naub", function () {
         let naub_a: Naub
         let naub_b: Naub
+        let naub_c: Naub
         beforeEach(function () {
-            naub_a = naubino.create_naub({ x: 10, y: 10 })
-            naub_b = naubino.create_naub({ x: -10, y: -10 })
+            naub_b = naubino.create_naub({ x: 0, y: 0 })
+            naub_a = naubino.create_naub({ x: naub_b.radius * -3, y: 0 })
+            naub_c = naubino.create_naub({ x: naub_b.radius * 3, y: 0 })
         })
         it("finds naub at naub center", function () {
             const naub = system.find_naub(naub_a.pos)
