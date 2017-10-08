@@ -58,12 +58,15 @@ class Naub {
     }
 
     merge_naub(other: Naub) {
+        const joints = []
         const other_naubs_joints = new Map(other.naubs_joints)
         for (const joined_naub of other_naubs_joints.keys()) {
             other.unjoin_naub(joined_naub)
-            this.join_naub(joined_naub)
+            const joint = this.join_naub(joined_naub)
+            joints.push(joint)
         }
         other.remove()
+        return joints
     }
 
     remove() {
@@ -268,10 +271,14 @@ class NaubColliderSystem {
         if (!naub_a.merges_with(naub_b)) return false
         if (naub_a.naubs_joints.size == 0) {
             this.ee.emit("join_naubs", naub_a, naub_b)
-            naub_a.join_naub(naub_b)
+            const joint = naub_a.join_naub(naub_b)
+            this.naubino.add_naub_joint(joint)
             return true
         }
-        naub_a.merge_naub(naub_b)
+        const joints = naub_a.merge_naub(naub_b)
+        for (const joint of joints) {
+            this.naubino.add_naub_joint(joint)
+        }
         naub_b.remove()
         const cycles = naub_a.find_cycles()
         for (const cycle of cycles) {
@@ -341,8 +348,13 @@ class NaubFactory {
 }
 
 interface NaubinoEventEmitter extends EventEmitter {
-    on(event: "naub_naub_collision", fn: EventEmitter.ListenerFn, context?: any): this;
-    on(event: "join_naubs", fn: EventEmitter.ListenerFn, context?: any): this;
+    on(event:
+        "naub_naub_collision" |
+        "join_naubs" |
+        "add_naub_joint",
+        fn: EventEmitter.ListenerFn,
+        context?: any,
+    ): this;
 }
 
 class Naubino {
@@ -397,6 +409,7 @@ class Naubino {
 
     add_naub_joint(joint: NaubJoint) {
         this.naub_joints.add(joint)
+        this.ee.emit("add_naub_joint", joint)
     }
     remove_naub_joint(joint: NaubJoint) {
         this.naub_joints.delete(joint)
@@ -410,8 +423,8 @@ class Naubino {
         return this.pointers.find_naub(pos)
     }
 
-    connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
-        return this.pointers.connect_pointer_naub(naub, pos, pointer)
+    connect_pointer_naub(naub: Naub, pos?: Vector) {
+        return this.pointers.connect_pointer_naub(naub, pos)
     }
 
     naub_touches_naub(naub_a: Naub, naub_b: Naub) {

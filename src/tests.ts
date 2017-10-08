@@ -85,13 +85,20 @@ describe("Naubino", () => {
         it("join two single naubs", function () {
             const naub_a = naubino.create_naub();
             const naub_b = naubino.create_naub();
+
+            let called = 0
+            naubino.ee.on("add_naub_joint", () => ++called)
+
             naubino.naub_touches_naub(naub_a, naub_b);
+
             assert.isTrue(naub_a.is_joined(naub_b))
+            assert.equal(called, 1, "add_naub_joint called")
         })
         it("join single naub with naub pair", function () {
             const naub_a = naubino.create_naub()
             const naubs = naubino.create_naub_chain(2)
             naubino.naub_touches_naub(naub_a, naubs[0])
+
             assert.isTrue(naub_a.is_joined(naubs[0]))
         })
         it("merge two naub pairs to a chain", function () {
