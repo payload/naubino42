@@ -1,8 +1,7 @@
 import { fail_condition } from "./utils"
 import { Timer } from "./timer"
+import { Vector, Matter } from "./matter-js"
 
-import * as Matter from "matter-js"
-import { Vector } from "matter-js"
 import * as _ from "lodash"
 import { EventEmitter } from "eventemitter3"
 
