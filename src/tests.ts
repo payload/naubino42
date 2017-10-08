@@ -135,18 +135,6 @@ describe("Naubino", () => {
     })
 
     describe("Pointer and Naubs", function () {
-        it("moves naub", function () {
-            const x_before = 10
-            const naub_a = naubino.create_naub({ x: x_before, y: 10 })
-            const pointer = naubino.connect_pointer_naub(naub_a)
-            pointer.pos.x = x_before - 10
-            // TODO first, naub bounces back. the pointer constraint moves not good
-            for (let i = 0; i < 10; i++) {
-                pointer.step()
-                naubino.step()
-            }
-            assert.isBelow(naub_a.pos.x, x_before)
-        })
         it("merges naub pairs next to each other", function () {
             const naubs_a = naubino.create_naub_chain(2, { x: 0, y: 10 })
             const naubs_b = naubino.create_naub_chain(2, { x: 0, y: -10 })
