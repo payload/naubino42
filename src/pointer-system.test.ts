@@ -86,6 +86,20 @@ describe("PointerSystem", function () {
             system.step()
             assert.deepEqual(called, [pointer], "remove_pointer called with pointer")
         })
+        describe("move", function () {
+            it("moves naub", function () {
+                const pos_a = { x: 10, y: 10 }
+                const pos_b = { x: -10, y: 10 }
+                const check = () => assert.isBelow(naub_a.pos.x, pos_a.x, "naub moved")
+
+                const naub_a = naubino.create_naub(pos_a)
+                const pointer = naubino.connect_pointer_naub(naub_a)
+                pointer.move(Vector.sub(pos_b, pos_a))
+                _.times(10, () => naubino.step())
+
+                check()
+            })
+        })
         describe("moveTo", function () {
             it("moves naub", function () {
                 const pos_a = { x: 10, y: 10 }
