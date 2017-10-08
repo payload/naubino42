@@ -378,8 +378,8 @@ class Naubino {
         return joint
     }
 
-    create_pointer(pos: Vector) {
-        let pointer = new Pointer(pos)
+    create_pointer(naub: Naub, pos: Vector) {
+        let pointer = new Pointer(naub, pos)
         this.pointers.pointers.add(pointer)
         return pointer
     }
@@ -467,7 +467,7 @@ class ArenaMode {
                 length: 0,
                 stiffness: 0.00001
             })
-            constraint.userData = { type: "ArenaMode.CenterJoint"}
+            constraint.userData = { type: "ArenaMode.CenterJoint" }
             Matter.World.add(this._naubino.engine.world, constraint)
         }
         return naubs

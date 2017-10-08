@@ -40,14 +40,7 @@ export class PointerSystem {
     connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
         console.assert(naub.alive)
         if (!pos) pos = _.clone(naub.pos)
-        if (!pointer) pointer = this.naubino.create_pointer(pos)
-        pointer.constraint = Matter.Constraint.create({
-            bodyA: pointer.body,
-            bodyB: naub.body,
-            pointB: Matter.Vector.sub(pointer.pos, naub.body.position),
-            length: 2
-        })
-        Matter.World.add(this.engine.world, pointer.constraint)
+        if (!pointer) pointer = this.naubino.create_pointer(naub, pos)
         this.map_naub_pointer.set(pointer, naub)
         naub.pointers.add(pointer)
         this.pointers.add(pointer)
@@ -59,14 +52,10 @@ export class PointerSystem {
         const naub = this.map_naub_pointer.get(pointer)
         this.map_naub_pointer.delete(pointer)
         if (naub) naub.pointers.delete(pointer)
-        Matter.World.remove(this.engine.world, pointer.constraint)
         this.ee.emit("remove_pointer", pointer)
     }
 
     step() {
-        for (const pointer of this.pointers) {
-            pointer.step()
-        }
         for (const pointer of this.pointers) {
             if (!pointer.alive) this.remove_pointer(pointer)
         }
@@ -76,19 +65,29 @@ export class PointerSystem {
 
 export class Pointer {
 
-    body = Matter.Body.create({})
     pos: Vector
+    naub: Naub
+    engine: Matter.Engine
     constraint: Matter.Constraint
     alive = true
 
-    constructor(pos: Vector) {
-        Matter.Body.setStatic(this.body, true)
-        Matter.Body.setPosition(this.body, pos)
+    constructor(naub: Naub, pos: Vector) {
         this.pos = pos
+        this.naub = naub
+        this.engine = naub.engine
+        this.constraint = Matter.Constraint.create({
+            bodyA: naub.body,
+            pointA: Matter.Vector.sub(this.pos, naub.body.position),
+            pointB: this.pos,
+            length: 0,
+        })
+        Matter.World.add(this.engine.world, this.constraint)
+
     }
 
     remove() {
         this.alive = false
+        Matter.World.remove(this.engine.world, this.constraint)
     }
 
     up() {
@@ -96,17 +95,11 @@ export class Pointer {
     }
 
     move(to_move: Vector) {
-        Vector.add(this.pos, to_move, this.pos)
+        Vector.add(this.constraint.pointB, to_move, this.constraint.pointB)
     }
 
     moveTo(pos: Vector) {
-        this.pos = pos
-    }
-
-    step() {
-        const body_pos = Vector_interpolate_to(this.body.position, this.pos, 1)
-        this.body.velocity = Matter.Vector.sub(body_pos, this.body.position)
-        this.body.position = body_pos
+        this.constraint.pointB = pos
     }
 }
 

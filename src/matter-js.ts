@@ -6,7 +6,15 @@ declare module "matter-js" {
     interface Constraint {
         userData?: any
     }
+    namespace Vector {
+        let distance: (a: Vector, b: Vector) => number
+    }
 }
+
+Vector.distance = function (a: Vector, b: Vector): number {
+    return Vector.magnitude(Vector.sub(b, a))
+}
+
 
 class WorldState {
     state: number[]

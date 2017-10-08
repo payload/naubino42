@@ -136,14 +136,11 @@ describe("Naubino", () => {
 
     describe("Pointer and Naubs", function () {
         it("merges naub pairs next to each other", function () {
-            const naubs_a = naubino.create_naub_chain(2, { x: 0, y: 10 })
-            const naubs_b = naubino.create_naub_chain(2, { x: 0, y: -10 })
+            const naubs_a = naubino.create_naub_chain(2, { x: 0, y: 0 })
+            const naubs_b = naubino.create_naub_chain(2, { x: 0, y: naubs_a[0].radius * 3 })
             const pointer = naubino.connect_pointer_naub(naubs_a[0])
-            pointer.pos = { x: naubs_b[0].pos.x, y: naubs_b[0].pos.y }
-            for (let i = 0; i < 100; i++) {
-                pointer.step()
-                naubino.step()
-            }
+            pointer.moveTo(naubs_b[0].pos)
+            _.times(100, () => naubino.step())
             assert.equal(naubino.naubs.size, 3, "one naub removed")
         })
         it("dont merge naubs without pointer", function () {
@@ -155,10 +152,7 @@ describe("Naubino", () => {
 
             const pointer = naubino.connect_pointer_naub(naubs_a[0])
             pointer.pos = { x: -pos_diff.x, y: 0 }
-            for (let i = 0; i < 100; i++) {
-                pointer.step()
-                naubino.step()
-            }
+            _.times(100, () => naubino.step())
             assert.equal(naubino.naubs.size, 4, "no naub merged")
         })
     })
