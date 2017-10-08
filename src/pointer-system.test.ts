@@ -20,7 +20,7 @@ describe("PointerSystem", function () {
     let system: PointerSystem
     beforeEach(function () {
         naubino = new Naubino()
-        system = new PointerSystem(naubino, naubino.engine)
+        system = naubino.pointers
     })
     describe("find_naub", function () {
         let naub_a: Naub
@@ -56,36 +56,33 @@ describe("PointerSystem", function () {
             assert.ok(pointer)
         })
         it("naubs join after touch_down", function () {
-            const naub_a = naubino.create_naub({ x: 10, y: 10 })
-            const naub_b = naubino.create_naub({ x: 10 + naub_a.radius*3, y: 10 })
-            const pointer = system.touch_down(naub_a.pos)
-            pointer.moveTo(naub_b.pos)
             let called: Array<any> = []
             naubino.ee.on("naub_naub_collision", () => called.push("naub_naub_collision"))
             naubino.ee.on("join_naubs", () => called.push("join_naubs"))
-            _.times(10, () => {
-                system.step()
-                naubino.step()
-            })
-            assert.deepEqual(called, ["naub_naub_collision", "join_naubs"])
+            const check = () => assert.deepEqual(called, ["naub_naub_collision", "join_naubs"])
+
+            const naub_a = naubino.create_naub({ x: 10, y: 10 })
+            const naub_b = naubino.create_naub({ x: 10 + naub_a.radius * 3, y: 10 })
+            const pointer = system.touch_down(naub_a.pos)
+            pointer.moveTo(naub_b.pos)
+            _.times(30, () => naubino.step())
+
+            check()
         })
         it("naubs don't join after touch up", function () {
-            const naub_a = naubino.create_naub({ x: 10, y: 10 })
-            const naub_b = naubino.create_naub({ x: 10 + naub_a.radius*3, y: 10 })
-            const pointer = system.touch_down(naub_a.pos)
-            pointer.moveTo(naub_b.pos)
             let called: Array<any> = []
             naubino.ee.on("naub_naub_collision", () => called.push("naub_naub_collision"))
             naubino.ee.on("join_naubs", () => called.push("join_naubs"))
-            system.step()
-            naubino.step()
+            const check = () => assert.deepEqual(called, ["naub_naub_collision"])
+
+            const naub_a = naubino.create_naub({ x: 10, y: 10 })
+            const naub_b = naubino.create_naub({ x: 10 + naub_a.radius * 3, y: 10 })
+            const pointer = system.touch_down(naub_a.pos)
             pointer.up()
             Matter.Body.applyForce(naub_a.body, naub_a.body.position, { x: naub_a.body.mass * 0.01, y: 0 })
-            _.times(10, () => {
-                system.step()
-                naubino.step()
-            })
-            assert.deepEqual(called, ["naub_naub_collision"])
+            _.times(10, () => naubino.step())
+
+            check()
         })
     })
     describe("Pointer", function () {
