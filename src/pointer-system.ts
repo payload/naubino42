@@ -41,17 +41,12 @@ export class PointerSystem {
         console.assert(naub.alive)
         if (!pos) pos = _.clone(naub.pos)
         if (!pointer) pointer = this.naubino.create_pointer(naub, pos)
-        this.map_naub_pointer.set(pointer, naub)
-        naub.pointers.add(pointer)
         this.pointers.add(pointer)
         return pointer
     }
 
     remove_pointer(pointer: Pointer) {
         this.pointers.delete(pointer)
-        const naub = this.map_naub_pointer.get(pointer)
-        this.map_naub_pointer.delete(pointer)
-        if (naub) naub.pointers.delete(pointer)
         this.ee.emit("remove_pointer", pointer)
     }
 
@@ -82,12 +77,13 @@ export class Pointer {
             length: 0,
         })
         Matter.World.add(this.engine.world, this.constraint)
-
+        this.naub.pointers.add(this)
     }
 
     remove() {
         this.alive = false
         Matter.World.remove(this.engine.world, this.constraint)
+        this.naub.pointers.delete(this)
     }
 
     up() {
