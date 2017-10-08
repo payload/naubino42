@@ -36,11 +36,10 @@ export class PointerSystem {
         return null
     }
 
-    // like pynaubino Naub.select
-    connect_pointer_naub(naub: Naub, pos?: Vector, pointer?: Pointer) {
+    connect_pointer_naub(naub: Naub, pos?: Vector) {
         console.assert(naub.alive)
         if (!pos) pos = _.clone(naub.pos)
-        if (!pointer) pointer = this.naubino.create_pointer(naub, pos)
+        const pointer = this.naubino.create_pointer(naub, pos)
         this.pointers.add(pointer)
         return pointer
     }
