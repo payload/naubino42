@@ -40,6 +40,11 @@ describe("PointerSystem", function () {
             const pointer = system.connect_pointer_naub(naub_a)
             assert.ok(pointer)
         })
+        it("creates pointer when applied on naub with offset", function () {
+            const naub_a = naubino.create_naub({ x: 10, y: 10 })
+            const pointer = system.connect_pointer_naub(naub_a, { x: 10, y: 10 })
+            assert.ok(pointer)
+        })
     })
     describe("touch_down", function () {
         it("creates pointer when applied on naub pos", function () {
