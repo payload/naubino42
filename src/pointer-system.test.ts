@@ -35,13 +35,15 @@ describe("PointerSystem", function () {
         })
     })
     describe("connect_pointer_naub", function () {
+        let naub_a: Naub
+        beforeEach(function () {
+            naub_a = naubino.create_naub({ x: 10, y: 10 })
+        })
         it("creates pointer when applied on naub", function () {
-            const naub_a = naubino.create_naub({ x: 10, y: 10 })
             const pointer = system.connect_pointer_naub(naub_a)
             assert.ok(pointer)
         })
         it("creates pointer when applied on naub with offset", function () {
-            const naub_a = naubino.create_naub({ x: 10, y: 10 })
             const pointer = system.connect_pointer_naub(naub_a, { x: 10, y: 10 })
             assert.ok(pointer)
         })
