@@ -4,16 +4,6 @@ import { Vector, Matter } from "./matter-js"
 import * as _ from "lodash"
 import { assert } from "chai"
 
-describe("Pointer", () => {
-    describe("step", function () {
-        it("moves when pos is set", () => {
-            const pointer = new Pointer({ x: 0, y: 0 })
-            pointer.pos = { x: 10, y: 0 }
-            pointer.step()
-            assert.isAbove(pointer.body.position.x, 0)
-        })
-    })
-})
 
 describe("PointerSystem", function () {
     let naubino: Naubino
@@ -109,7 +99,18 @@ describe("PointerSystem", function () {
 
                 check()
             })
+            it("moves naub in 1 sec 600 px", function () {
+                const pos_a = { x: -300, y: 10 }
+                const pos_b = { x: 300, y: 10 }
+                const check = () => assert.isBelow(Vector.distance(naub_a.pos, pos_b), naub_a.radius, "naub near destination")
+
+                const naub_a = naubino.create_naub(pos_a)
+                const pointer = naubino.connect_pointer_naub(naub_a)
+                pointer.moveTo(pos_b)
+                _.times(60, () => naubino.step())
+
+                check()
+            })
         })
     })
 })
-
