@@ -266,6 +266,7 @@ class NaubColliderSystem {
     naub_touches_naub(naub_a: Naub, naub_b: Naub) {
         if (!naub_a.merges_with(naub_b)) return false
         if (naub_a.naubs_joints.size == 0) {
+            this.ee.emit("join_naubs", naub_a, naub_b)
             naub_a.join_naub(naub_b)
             return true
         }
@@ -291,7 +292,7 @@ class PointerSystem {
     naubino: Naubino
     engine: Matter.Engine
     pointers = new Set<Pointer>()
-    map_naub_pointer = new Map<Naub, Pointer>();
+    map_naub_pointer = new Map<Pointer, Naub>();
     ee = new EventEmitter()
 
     constructor(naubino: Naubino, engine: Matter.Engine) {
@@ -323,7 +324,6 @@ class PointerSystem {
         console.assert(naub.alive)
         if (!pos) pos = _.clone(naub.pos)
         if (!pointer) pointer = this.naubino.create_pointer(pos)
-        console.assert(this.map_naub_pointer.get(naub) != pointer)
         pointer.constraint = Matter.Constraint.create({
             bodyA: pointer.body,
             bodyB: naub.body,
@@ -331,8 +331,7 @@ class PointerSystem {
             length: 2
         })
         Matter.World.add(this.engine.world, pointer.constraint)
-        // TODO map_naub_pointer unused
-        this.map_naub_pointer.set(naub, pointer)
+        this.map_naub_pointer.set(pointer, naub)
         naub.pointers.add(pointer)
         this.pointers.add(pointer)
         return pointer
@@ -340,6 +339,9 @@ class PointerSystem {
 
     remove_pointer(pointer: Pointer) {
         this.pointers.delete(pointer)
+        const naub = this.map_naub_pointer.get(pointer)
+        this.map_naub_pointer.delete(pointer)
+        if (naub) naub.pointers.delete(pointer)
         Matter.World.remove(this.engine.world, pointer.constraint)
         this.ee.emit("remove_pointer", pointer)
     }
@@ -406,6 +408,11 @@ class NaubFactory {
     }
 }
 
+interface NaubinoEventEmitter extends EventEmitter {
+    on(event: "naub_naub_collision", fn: EventEmitter.ListenerFn, context?: any): this;
+    on(event: "join_naubs", fn: EventEmitter.ListenerFn, context?: any): this;
+}
+
 class Naubino {
     size: Vector = { x: 1, y: 1 }
 
@@ -416,12 +423,13 @@ class Naubino {
     collider = new NaubColliderSystem(this, this.engine)
     pointers = new PointerSystem(this, this.engine)
     naub_fac = new NaubFactory(this)
-    ee = new EventEmitter()
+    ee: NaubinoEventEmitter = new EventEmitter()
 
     constructor() {
         this.engine.world.gravity.x = 0
         this.engine.world.gravity.y = 0
         this.collider.ee.on("naub_naub_collision", (...args) => this.ee.emit("naub_naub_collision", ...args))
+        this.collider.ee.on("join_naubs", (...args) => this.ee.emit("join_naubs", ...args))
     }
 
     create_naub(pos?: Vector) {
