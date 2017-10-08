@@ -60,11 +60,19 @@ function naubino_start() {
 function main_loop() {
     mode.step()
     const update = naubino.step()
+    main_loop_render(update)
+    window.requestAnimationFrame(() => {
+        main_loop()
+    })
+}
 
+function main_loop_render(update: Update) {
     const ctx = canvas.getContext("2d")
+    ctx.save()
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    ctx.fillStyle = "black"
+    ctx.save()
+    ctx.strokeStyle = "black"
     for (const joint of update.naub_joints) {
         const { x: xa, y: ya } = joint.naub_a.pos
         const { x: xb, y: yb } = joint.naub_b.pos
@@ -75,7 +83,9 @@ function main_loop() {
         ctx.closePath()
         ctx.stroke()
     }
+    ctx.restore()
 
+    ctx.save()
     ctx.fillStyle = "black"
     for (const naub of update.naubs) {
         ctx.beginPath()
@@ -83,8 +93,46 @@ function main_loop() {
         ctx.closePath()
         ctx.fill()
     }
+    ctx.restore()
 
-    window.requestAnimationFrame(() => {
-        main_loop()
-    })
+    const world = naubino.engine.world
+
+    ctx.save()
+    for (const constraint of world.constraints) {
+        const { pointA, pointB, bodyA, bodyB, userData } = constraint
+        const xa = pointA.x + (bodyA ? bodyA.position.x : 0)
+        const ya = pointA.y + (bodyA ? bodyA.position.y : 0)
+        const xb = pointB.x + (bodyB ? bodyB.position.x : 0)
+        const yb = pointB.y + (bodyB ? bodyB.position.y : 0)
+
+        ctx.save()
+        if (userData) {
+            switch (userData.type) {
+                case "ArenaMode.CenterJoint":
+                    ctx.setLineDash([1, 5])
+                    ctx.strokeStyle = "lightgray"
+                    ctx.lineWidth = 1
+                    break
+                case "NaubJoint":
+                    ctx.strokeStyle = "gray"
+                    ctx.lineWidth = 1
+                    break
+                default:
+                    ctx.strokeStyle = "red"
+                    ctx.lineWidth = 2
+            }
+        } else {
+            ctx.strokeStyle = "red"
+            ctx.lineWidth = 2
+        }
+        ctx.beginPath()
+        ctx.moveTo(xa, ya)
+        ctx.lineTo(xb, yb)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.restore()
+    }
+    ctx.restore()
+
+    ctx.restore()
 }

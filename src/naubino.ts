@@ -170,6 +170,7 @@ class NaubJoint {
             stiffness: 0.05,
             length: NaubJoint.targetLength(this.naub_a, this.naub_b)
         })
+        this.constraint.userData = { type: "NaubJoint", NaubJoint: this }
         const { engine } = this.naub_a
         Matter.World.add(engine.world, this.constraint)
     }
@@ -566,6 +567,7 @@ class ArenaMode {
                 length: 0,
                 stiffness: 0.00001
             })
+            constraint.userData = { type: "ArenaMode.CenterJoint"}
             Matter.World.add(this._naubino.engine.world, constraint)
         }
         return naubs
