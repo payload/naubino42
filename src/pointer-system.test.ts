@@ -1,7 +1,6 @@
 import { PointerSystem, Naub, Pointer, Naubino } from "./naubino"
+import { Vector, Matter } from "./matter-js"
 
-import * as Matter from "matter-js"
-import { Vector } from "matter-js"
 import * as _ from "lodash"
 import { assert } from "chai"
 
