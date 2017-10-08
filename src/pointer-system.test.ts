@@ -60,10 +60,11 @@ describe("PointerSystem", function () {
         it("gets removed when naub removes", function () {
             const naub_a = naubino.create_naub({ x: 10, y: 10 })
             const pointer = system.touch_down(naub_a.pos)
-            assert.ok(system.pointers.has(pointer), "pointer created")
             naub_a.remove()
             system.step()
-            assert.notOk(system.pointers.has(pointer), "pointer removed")
+            let called = new Array<Pointer>()
+            system.ee.on("remove_pointer", (pointer) => called.push(pointer))
+            assert.deepEqual(called, [pointer], "remove_pointer called with pointer")
         })
     })
 })
