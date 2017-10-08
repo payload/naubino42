@@ -82,36 +82,43 @@ describe("Naubino", () => {
     })
 
     describe("naub_touches_naub", function () {
+        let naub_a: Naub
+        let naub_b: Naub
+        let naubs_a: Naub[]
+        let naubs_b: Naub[]
+        beforeEach(function () {
+            naub_a = naubino.create_naub();
+            naub_b = naubino.create_naub();
+            naubs_a = naubino.create_naub_chain(2)
+            naubs_b = naubino.create_naub_chain(2)
+        })
         it("join two single naubs", function () {
-            const naub_a = naubino.create_naub();
-            const naub_b = naubino.create_naub();
-
+            naubino.naub_touches_naub(naub_a, naub_b);
+            assert.isTrue(naub_a.is_joined(naub_b))
+        })
+        it("join two single naubs adds naub joint", function () {
             let called = 0
             naubino.ee.on("add_naub_joint", () => ++called)
-
             naubino.naub_touches_naub(naub_a, naub_b);
-
-            assert.isTrue(naub_a.is_joined(naub_b))
             assert.equal(called, 1, "add_naub_joint called")
         })
         it("join single naub with naub pair", function () {
-            const naub_a = naubino.create_naub()
-            const naubs = naubino.create_naub_chain(2)
-            naubino.naub_touches_naub(naub_a, naubs[0])
-
-            assert.isTrue(naub_a.is_joined(naubs[0]))
+            naubino.naub_touches_naub(naub_a, naubs_a[0])
+            assert.isTrue(naub_a.is_joined(naubs_a[0]))
         })
         it("merge two naub pairs to a chain", function () {
-            const naubs_a = naubino.create_naub_chain(2)
-            const naubs_b = naubino.create_naub_chain(2)
             naubino.naub_touches_naub(naubs_a[0], naubs_b[0])
             assert.isTrue(naubs_a[0].is_joined(naubs_a[1]))
             assert.isTrue(naubs_a[0].is_joined(naubs_b[1]))
             assert.isFalse(naubs_a[0].is_joined(naubs_b[0]))
         })
+        it("merge two naub paris to a chain adds naub joint", function () {
+            let called = 0
+            naubino.ee.on("add_naub_joint", () => ++called)
+            naubino.naub_touches_naub(naubs_a[0], naubs_b[0])
+            assert.equal(called, 1, "add_naub_joint called")
+        })
         it("merge two naub pairs and kill naub_b", function () {
-            const naubs_a = naubino.create_naub_chain(2)
-            const naubs_b = naubino.create_naub_chain(2)
             naubino.naub_touches_naub(naubs_a[0], naubs_b[0])
             assert.isTrue(naubs_a[0].alive, "naub a 0 alive")
             assert.isTrue(naubs_a[1].alive, "naub a 1 alive")
