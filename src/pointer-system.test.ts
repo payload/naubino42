@@ -45,6 +45,11 @@ describe("PointerSystem", function () {
             const pointer = system.touch_down(naub_a.pos)
             assert.ok(pointer)
         })
+        it("creates no pointer when applied on no naub pos", function () {
+            const naub_a = naubino.create_naub({ x: 0, y: 0 })
+            const pointer = system.touch_down({ x: naub_a.radius * 3, y: 0 })
+            assert.isNull(pointer)
+        })
         it("naubs join after touch_down", function () {
             let called: Array<any> = []
             naubino.ee.on("naub_naub_collision", () => called.push("naub_naub_collision"))
