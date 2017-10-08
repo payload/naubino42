@@ -98,11 +98,3 @@ export class Pointer {
         this.constraint.pointB = pos
     }
 }
-
-
-function Vector_interpolate_to(a: Vector, b: Vector, ratio: number, out?: Vector) {
-    const diff = Matter.Vector.sub(b, a)
-    const norm = Matter.Vector.normalise(diff)
-    const forward = Matter.Vector.mult(norm, ratio)
-    return Matter.Vector.add(a, forward, out)
-}
