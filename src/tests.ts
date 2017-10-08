@@ -1,5 +1,4 @@
-import * as Matter from "matter-js"
-import { Vector } from "matter-js"
+import { Vector, Matter, WorldState } from "./matter-js"
 import { Naubino, Naub, NaubJoint, Pointer, Hunter, ArenaMode } from "./naubino"
 
 import { assert } from "chai"
@@ -256,25 +255,6 @@ describe("Naubino", () => {
         })
     })
 })
-
-class WorldState {
-    state: number[]
-    constructor(world: Matter.World) {
-        this.state = [world.bodies.length, world.constraints.length, world.composites.length]
-    }
-    someGt(other: WorldState) {
-        return _.some(_.zip(this.state, other.state), ([a, b]) => _.gt(a, b))
-    }
-    allGte(other: WorldState) {
-        return _.every(_.zip(this.state, other.state), ([a, b]) => _.gte(a, b))
-    }
-    eq(other: WorldState) {
-        return _.every(_.zip(this.state, other.state), ([a, b]) => _.eq(a, b))
-    }
-    toString() {
-        return JSON.stringify(_.zipObject("bodies constraints composites".split(" "), this.state))
-    }
-}
 
 class ScenarioPopNaubChainsClearsNaubino {
     naubino: Naubino
