@@ -80,6 +80,43 @@ const palette = new Map<string, number[]>([
     ["purple", [100, 31, 128]],
     ["yellow", [255, 204, 0]]])
 
+
+interface NState {
+    x: number
+    y: number
+    radius: number
+    color: string
+    alpha: number
+}
+class NAnimState {
+    a: NState
+    b: NState
+    time: number
+    duration: number
+}
+class NAnim extends NAnimState {
+    constructor(state: NAnimState) {
+        super()
+        this.a = state.a
+        this.b = state.b
+        this.time = state.time
+        this.duration = state.duration
+    }
+    interpolate(): NState {
+        const { a, b, time, duration } = this
+        const f = time / duration
+        const interp = (field: 'x' | 'y' | 'radius' | 'alpha') => a[field] + (b[field] - a[field]) * f
+        return {
+            x: interp('x'),
+            y: interp('y'),
+            radius: interp('radius'),
+            color: b.color,
+            alpha: interp('alpha')
+        }
+    }
+}
+let naub_anims = new Set<NAnim>()
+
 function main_loop_render(update: Update) {
     const ctx = canvas.getContext("2d")
     ctx.save()
@@ -101,7 +138,7 @@ function main_loop_render(update: Update) {
 
     ctx.save()
     for (const naub of update.naubs) {
-        const color = "rgb("+palette.get(naub.color).join(",")+")"
+        const color = "rgb(" + palette.get(naub.color).join(",") + ")"
         ctx.fillStyle = color
         ctx.beginPath()
         ctx.arc(naub.pos.x, naub.pos.y, naub.radius, 0, Math.PI * 2)
@@ -109,6 +146,44 @@ function main_loop_render(update: Update) {
         ctx.fill()
     }
     ctx.restore()
+
+    for (const naub of update.removed_naubs) {
+        const duration = 1
+        naub_anims.add(new NAnim({
+            a: {
+                x: naub.pos.x,
+                y: naub.pos.y,
+                radius: naub.radius,
+                color: naub.color,
+                alpha: 1
+            },
+            b: {
+                x: naub.pos.x + naub.body.velocity.x * duration,
+                y: naub.pos.y + naub.body.velocity.y * duration,
+                radius: 0,
+                color: naub.color,
+                alpha: 0
+            },
+            time: 0,
+            duration: duration
+        }))
+    }
+    ctx.save()
+    for (const anim of naub_anims) {
+        anim.time = Math.min(anim.time + 0.016666, anim.duration)
+        const naub = anim.interpolate()
+        const color = "rgba(" + palette.get(naub.color).join(",") + "," + naub.alpha + ")"
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(naub.x, naub.y, naub.radius, 0, Math.PI * 2)
+        ctx.closePath()
+        ctx.fill()
+    }
+    for (const anim of naub_anims) {
+        if (anim.time == anim.duration) {
+            naub_anims.delete(anim)
+        }
+    }
 
     const world = naubino.engine.world
 

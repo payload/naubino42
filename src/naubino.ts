@@ -9,6 +9,7 @@ import { EventEmitter } from "eventemitter3"
 class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
+    removed_naubs: Set<Naub>
 }
 
 const bodyNaubMap = new Map<number, Naub>();
@@ -79,7 +80,9 @@ class Naub {
             pointer.remove()
         }
         this.pointers.clear()
+        const vel = _.clone(this.body.velocity)
         Matter.World.remove(this.engine.world, this.body)
+        this.body.velocity = vel
     }
 
     is_joined(other: Naub) {
@@ -433,10 +436,12 @@ class Naubino {
     step(): Update {
         this.pointers.step()
         Matter.Engine.update(this.engine)
+        const removed_naubs = new Set<Naub>()
         for (const naub of this.naubs) {
             if (!naub.alive) {
                 this.naubs.delete(naub)
                 this.ee.emit("naub_removed", naub)
+                removed_naubs.add(naub)
             }
         }
         for (const joint of this.naub_joints) {
@@ -447,7 +452,8 @@ class Naubino {
         }
         return <Update>{
             naubs: this.naubs,
-            naub_joints: this.naub_joints
+            naub_joints: this.naub_joints,
+            removed_naubs: removed_naubs
         }
     }
 
