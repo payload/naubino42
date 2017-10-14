@@ -47,12 +47,16 @@ function canvas_init() {
             pointerMap.delete(ev.pointerId)
         }
     })
+    window.addEventListener("keypress", (ev) => {
+        if (ev.key == " ") mode.spam_naub_pair()
+    })
 }
 
 function naubino_init() {
     naubino = new Naubino()
     naubino.size = { x: 600, y: 400 }
     mode = new ArenaMode(naubino)
+    mode.spammer = false;
 }
 
 function naubino_start() {
