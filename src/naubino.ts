@@ -461,6 +461,8 @@ class ArenaMode {
     max_naubs = 80
     _naubino: Naubino
     _spammer = new Timer(3, () => this.spam_naub_bunch()).start()
+    spammer = true
+
     constructor(naubino: Naubino) {
         console.assert(naubino)
         this._naubino = naubino
@@ -500,7 +502,7 @@ class ArenaMode {
         return Vector.mult(this._naubino.size, 0.5)
     }
     step() {
-        this._spammer.step(60 / 1)
+        if (this.spammer) this._spammer.step(60 / 1)
     }
 }
 
