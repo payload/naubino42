@@ -493,6 +493,8 @@ class ArenaMode {
             constraint.userData = { type: "ArenaMode.CenterJoint" }
             Matter.World.add(this._naubino.engine.world, constraint)
             this.naubMap.set(naub, { CenterJoint: constraint })
+            const palette = "red pink green blue purple yellow".split(" ")
+            naub.color = _.sample(palette)
         }
         return naubs
     }
