@@ -72,6 +72,14 @@ function main_loop() {
     })
 }
 
+const palette = new Map<string, number[]>([
+    ["red", [229, 53, 23]],
+    ["pink", [226, 0, 122]],
+    ["green", [151, 190, 13]],
+    ["blue", [0, 139, 208]],
+    ["purple", [100, 31, 128]],
+    ["yellow", [255, 204, 0]]])
+
 function main_loop_render(update: Update) {
     const ctx = canvas.getContext("2d")
     ctx.save()
@@ -92,8 +100,9 @@ function main_loop_render(update: Update) {
     ctx.restore()
 
     ctx.save()
-    ctx.fillStyle = "black"
     for (const naub of update.naubs) {
+        const color = "rgb("+palette.get(naub.color).join(",")+")"
+        ctx.fillStyle = color
         ctx.beginPath()
         ctx.arc(naub.pos.x, naub.pos.y, naub.radius, 0, Math.PI * 2)
         ctx.closePath()
