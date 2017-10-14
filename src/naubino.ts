@@ -260,7 +260,7 @@ class NaubColliderSystem {
             const naub_b = bodyNaubMap.get(pair.bodyB.id)
             if (naub_a && naub_b) {
                 this.ee.emit("naub_naub_collision", naub_a, naub_b, pair)
-                if (naub_a.pointers.size > 0) {
+                if (naub_a.pointers.size > 0 || naub_b.pointers.size > 0) {
                     this.naub_touches_naub(naub_a, naub_b)
                 }
             }
