@@ -27,7 +27,8 @@ function canvas_init() {
     ctx.fillText("naubino", canvas.width / 2, canvas.height / 2)
 
     canvas.addEventListener("pointerdown", (ev) => {
-        const pointer = naubino.touch_down({ x: ev.x, y: ev.y })
+        const rect = canvas.getBoundingClientRect()
+        const pointer = naubino.touch_down({ x: -rect.left + ev.x, y: -rect.top + ev.y })
         if (pointer) {
             pointerMap.set(ev.pointerId, pointer)
         }
@@ -35,7 +36,8 @@ function canvas_init() {
     canvas.addEventListener("pointermove", (ev) => {
         const pointer = pointerMap.get(ev.pointerId)
         if (pointer) {
-            pointer.moveTo({ x: ev.x, y: ev.y })
+            const rect = canvas.getBoundingClientRect()
+            pointer.moveTo({ x: -rect.left + ev.x, y: -rect.top + ev.y })
         }
     })
     canvas.addEventListener("pointerup", (ev) => {
