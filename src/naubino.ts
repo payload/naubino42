@@ -288,9 +288,7 @@ class NaubColliderSystem {
 
     pop_cycle(cycle: Naub[]) {
         for (const naub of cycle) {
-            // TODO conceptualize removal
             naub.remove()
-            this.naubino.remove_naub(naub)
         }
     }
 }
@@ -351,7 +349,8 @@ interface NaubinoEventEmitter extends EventEmitter {
     on(event:
         "naub_naub_collision" |
         "join_naubs" |
-        "add_naub_joint",
+        "add_naub_joint" |
+        "naub_removed",
         fn: EventEmitter.ListenerFn,
         context?: any,
     ): this;
@@ -435,7 +434,10 @@ class Naubino {
         this.pointers.step()
         Matter.Engine.update(this.engine)
         for (const naub of this.naubs) {
-            if (!naub.alive) this.naubs.delete(naub)
+            if (!naub.alive) {
+                this.naubs.delete(naub)
+                this.ee.emit("naub_removed", naub)
+            }
         }
         for (const joint of this.naub_joints) {
             if (!joint.alive) this.naub_joints.delete(joint)
@@ -457,15 +459,21 @@ class Naubino {
 }
 
 
+interface ArenaModeNaub {
+    CenterJoint: Matter.Constraint
+}
+
 class ArenaMode {
     max_naubs = 80
     _naubino: Naubino
     _spammer = new Timer(3, () => this.spam_naub_bunch()).start()
     spammer = true
+    naubMap = new Map<Naub, ArenaModeNaub>()
 
     constructor(naubino: Naubino) {
         console.assert(naubino)
         this._naubino = naubino
+        naubino.ee.on("naub_removed", this.on_naub_removed, this)
     }
     spam_naub_bunch(): Naub[] {
         if (this._naubino.naubs.size > this.max_naubs - 2) return
@@ -484,8 +492,15 @@ class ArenaMode {
             })
             constraint.userData = { type: "ArenaMode.CenterJoint" }
             Matter.World.add(this._naubino.engine.world, constraint)
+            this.naubMap.set(naub, { CenterJoint: constraint })
         }
         return naubs
+    }
+    on_naub_removed(naub: Naub) {
+        const my_naub = this.naubMap.get(naub)
+        if (my_naub) {
+            Matter.World.remove(this._naubino.engine.world, my_naub.CenterJoint)
+        }
     }
     random_naub_pos(): Vector {
         const { sin, cos, max, random, PI } = Math
