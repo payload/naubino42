@@ -19,6 +19,7 @@
     "matter-js": "https://github.com/payload/matter-js.git",
     "nyc": "^11.2.1",
     "pepjs": "^0.4.3",
+    "screenfull": "^3.3.1",
     "watchify": "*"
   },
   "devDependencies": {
