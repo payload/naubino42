@@ -2,11 +2,12 @@ import { fail_condition } from "./utils"
 import { Timer } from "./timer"
 import { Vector, Matter } from "./matter-js"
 import { PointerSystem, Pointer } from "./pointer-system"
+export { Pointer, PointerSystem }
 
 import * as _ from "lodash"
 import { EventEmitter } from "eventemitter3"
 
-class Update {
+export class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
     removed_naubs: Set<Naub>
@@ -14,7 +15,7 @@ class Update {
 
 const bodyNaubMap = new Map<number, Naub>();
 
-class Naub {
+export class Naub {
     _radius = 15
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
@@ -160,17 +161,15 @@ class Naub {
 }
 
 
-class NaubJoint {
+export class NaubJoint {
 
-    naub_a: Naub
-    naub_b: Naub
     alive = true
 
     constraint: Matter.Constraint
 
-    constructor(naub_a: Naub, naub_b: Naub) {
-        this.naub_a = naub_a
-        this.naub_b = naub_b
+    constructor(public naub_a: Naub, public naub_b: Naub) {
+        console.assert(this.naub_a)
+        console.assert(this.naub_b)
         this.constraint = Matter.Constraint.create({
             bodyA: naub_a.body,
             bodyB: naub_b.body,
@@ -193,56 +192,52 @@ class NaubJoint {
     }
 }
 
-class Hunter {
-    _naubino: Naubino
-    _naub_a: Naub
-    _naub_b: Naub
-    _touch: Pointer
-    _force = _.random(8, 12)
-    finished = false
+export class Hunter {
+    public finished = false
 
-    constructor(naubino: Naubino, naub_a: Naub, naub_b: Naub) {
-        this._naubino = naubino
-        this._naub_a = naub_a
-        this._naub_b = naub_b
-        this._touch = naubino.touch_down(naub_a.pos)
-        console.assert(this._naubino)
-        console.assert(this._naub_a)
-        console.assert(this._naub_b)
-        console.assert(this._touch)
+    private touch: Pointer
+    private force = _.random(9, 12)
+
+    constructor(private naubino: Naubino, private naub_a: Naub, private naub_b: Naub) {
+        this.touch = naubino.touch_down(naub_a.pos)
+
+        console.assert(this.naubino)
+        console.assert(this.naub_a)
+        console.assert(this.naub_b)
+        console.assert(this.touch)
     }
 
     step() {
         // TODO this.finished could be a cb or promise
-        const { _touch, _naub_a, _naub_b } = this
+        const { touch, naub_a, naub_b } = this
         if (this.finished) {
             return // already finished
         }
-        if (!_touch) {
+        if (!touch) {
             this.finished = true
             return // no touch
         }
-        if (!_naub_a.alive) {
-            _touch.up()
-            this._naubino.remove_pointer(_touch)
+        if (!naub_a.alive) {
+            touch.up()
+            this.naubino.remove_pointer(touch)
             this.finished = true
             return // naub_a not alive
         }
-        if (!_naub_a.merges_with(_naub_b)) {
-            _touch.up()
-            this._naubino.remove_pointer(_touch)
+        if (!naub_a.merges_with(naub_b)) {
+            touch.up()
+            this.naubino.remove_pointer(touch)
             this.finished = true
             return // naub_a doesn't merge with naub_b
         }
-        const a = _naub_a.pos
-        const b = _naub_b.pos
+        const a = naub_a.pos
+        const b = naub_b.pos
         const diff = Vector.sub(b, a)
         if (Vector.magnitudeSquared(diff) > 1) {
             const direction = Vector.normalise(diff)
-            const forward = Vector.mult(direction, this._force)
-            _touch.move(forward)
+            const forward = Vector.mult(direction, this.force)
+            touch.move(forward)
         } else {
-            _touch.move(diff)
+            touch.move(diff)
         }
     }
 }
@@ -359,7 +354,7 @@ interface NaubinoEventEmitter extends EventEmitter {
     ): this;
 }
 
-class Naubino {
+export class Naubino {
     size: Vector = { x: 1, y: 1 }
 
     naubs = new Set<Naub>()
@@ -469,6 +464,7 @@ interface ArenaModeNaub {
     CenterJoint: Matter.Constraint
 }
 
+export
 class ArenaMode {
     max_naubs = 80
     _naubino: Naubino
@@ -533,5 +529,3 @@ class ArenaMode {
         if (this.spammer) this._spammer.step(1 / 60)
     }
 }
-
-export { Naubino, Naub, NaubJoint, Pointer, Hunter, Update, ArenaMode, PointerSystem }
