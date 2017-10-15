@@ -15,7 +15,7 @@ class Update {
 const bodyNaubMap = new Map<number, Naub>();
 
 class Naub {
-    _radius = 10
+    _radius = 15
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
     pointers = new Set<Pointer>()
@@ -488,7 +488,7 @@ class ArenaMode {
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
         //const rot = 2 * Math.PI * Math.random()
-        const naubs = this._naubino.create_naub_chain(2, pos)
+        const naubs = this._naubino.create_naub_chain(2, pos, Math.random() * 2 * Math.PI)
         for (const naub of naubs) {
             const constraint = Matter.Constraint.create({
                 bodyA: naub.body,
@@ -521,11 +521,16 @@ class ArenaMode {
             y: (sin(angle) * (radius + magic) + y / 2)
         }
     }
+    set_center_pos() {
+        for (const my_naub of this.naubMap.values()) {
+            my_naub.CenterJoint.pointB = this.center_pos()
+        }
+    }
     center_pos() {
         return Vector.mult(this._naubino.size, 0.5)
     }
     step() {
-        if (this.spammer) this._spammer.step(60 / 1)
+        if (this.spammer) this._spammer.step(1 / 60)
     }
 }
 
