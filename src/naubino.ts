@@ -14,8 +14,10 @@ class Update {
 const bodyNaubMap = new Map<number, Naub>();
 
 class Naub {
+    static id_generator = 0
     static default_radius = 15
-    
+
+    _id = Naub.id_generator++
     _radius = Naub.default_radius
     alive = true
     naubs_joints = new Map<Naub, NaubJoint>()
@@ -369,6 +371,7 @@ class Naubino {
     pointers = new PointerSystem(this, this.engine)
     naub_fac = new NaubFactory(this)
     ee: NaubinoEventEmitter = new EventEmitter()
+    debug_matter_queries = new Array<Matter.Vertices>()
 
     constructor() {
         this.engine.world.gravity.x = 0
@@ -430,6 +433,10 @@ class Naubino {
 
     naub_touches_naub(naub_a: Naub, naub_b: Naub) {
         this.collider.naub_touches_naub(naub_a, naub_b)
+    }
+
+    debug_matter_query(vertices: Matter.Vertices) {
+        this.debug_matter_queries.push(vertices)
     }
 
     step(): Update {
