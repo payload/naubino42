@@ -318,7 +318,25 @@ function main_loop_render(update: Update) {
     //render_pointer_history(ctx)
     ctx.restore()
 
+    ctx.save()
+    render_debug_matter_query(ctx)
     ctx.restore()
+
+    ctx.restore()
+}
+
+function render_debug_matter_query(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "rgba(255, 0, 0, 0.3)"
+    for (const query of naubino.debug_matter_queries) {
+        ctx.beginPath()
+        ctx.moveTo((<any>query)[0].x, (<any>query)[0].y)
+        for (const p of (<Array<Vector>>query).slice(1)) {
+            ctx.lineTo(p.x, p.y)
+        }
+        ctx.closePath()
+        ctx.fill()
+    }
+    naubino.debug_matter_queries = []
 }
 
 function render_matter(ctx: CanvasRenderingContext2D) {
