@@ -509,6 +509,7 @@ class ArenaMode {
     }
     on_naub_removed(naub: Naub) {
         const my_naub = this.naubMap.get(naub)
+        this.naubMap.delete(naub)
         if (my_naub) {
             Matter.World.remove(this._naubino.engine.world, my_naub.CenterJoint)
         }
