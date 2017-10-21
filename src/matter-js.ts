@@ -21,16 +21,16 @@ class WorldState {
     constructor(world: Matter.World) {
         this.state = [world.bodies.length, world.constraints.length, world.composites.length]
     }
-    someGt(other: WorldState) {
+    someGt(other: WorldState): boolean {
         return _.some(_.zip(this.state, other.state), ([a, b]) => _.gt(a, b))
     }
-    allGte(other: WorldState) {
+    allGte(other: WorldState): boolean {
         return _.every(_.zip(this.state, other.state), ([a, b]) => _.gte(a, b))
     }
-    eq(other: WorldState) {
+    eq(other: WorldState): boolean {
         return _.every(_.zip(this.state, other.state), ([a, b]) => _.eq(a, b))
     }
-    toString() {
+    toString(): string {
         return JSON.stringify(_.zipObject("bodies constraints composites".split(" "), this.state))
     }
 }
