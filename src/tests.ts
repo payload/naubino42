@@ -283,17 +283,16 @@ describe("Hunter", () => {
     })
 
     it("moves naub", () => {
-        const naub_a = naubino.create_naub({ x: -10, y: 0 });
-        const naub_b = naubino.create_naub({ x: 0, y: 0 });
-        console.assert(naubino.naubs.size == 2)
+        const naub_a = naubino.create_naub({ x: 0, y: 0 });
+        const naub_b = naubino.create_naub({ x: naub_a.radius * 100, y: 0 });
         const hunter = new Hunter(naubino, naub_a, naub_b)
         // TODO bounce back undesired (naub_a.pos.x < -10)
         // TODO sometimes doesn't move right
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 30; i++) {
             hunter.step()
             naubino.step()
         }
-        console.assert(naub_a.pos.x > -10)
+        assert.isAbove(naub_a.pos.x, naub_a.radius, "moved naub significantly")
     })
 
     it("pop naub chains clears naubino", () => {
