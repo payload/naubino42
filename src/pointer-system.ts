@@ -27,7 +27,9 @@ export class PointerSystem {
     }
 
     find_naub(pos: Vector): Naub {
-        const hits = Matter.Query.point(this.engine.world.bodies, pos)
+        const circle = Matter.Bodies.circle(pos.x, pos.y, Naub.default_radius)
+        const hits = Matter.Query.region(this.engine.world.bodies, circle.bounds)
+        this.naubino.debug_matter_query(circle.vertices)
         for (const body of hits) {
             for (const naub of this.naubino.naubs) {
                 if (naub.body == body) return naub
