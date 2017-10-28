@@ -2,22 +2,12 @@
   "name": "naubino42",
   "version": "0.1.0",
   "description": "",
-  "scripts": {
-    "build": "npm run build-ts",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
-    "test": "nyc mocha",
-    "watchify": "watchify dist/main-web.js -o dist/main-web.browserify.js",
-    "browserify": "browserify dist/main-web.js -o dist/main-web.browserify.js"
-  },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "browserify": "*",
     "eventemitter3": "^2.0.3",
     "lodash": "*",
     "matter-js": "https://github.com/payload/matter-js.git",
-    "nyc": "^11.2.1",
     "pepjs": "^0.4.3",
     "watchify": "*"
   },
@@ -27,11 +17,20 @@
     "@types/matter-js": "*",
     "@types/mocha": "*",
     "@types/node": "*",
+    "awesome-typescript-loader": "^3.2.3",
     "chai": "*",
     "mocha": "*",
+    "nyc": "^11.2.1",
+    "source-map-loader": "^0.2.2",
     "source-map-support": "^0.4.18",
     "ts-node": "^3.3.0",
-    "typescript": "*"
+    "typescript": "*",
+    "webpack": "^3.7.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "webpack": "webpack",
+    "test": "nyc mocha"
   },
   "nyc": {
     "extension": [

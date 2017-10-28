@@ -59,15 +59,11 @@ export class PointerSystem {
 
 export class Pointer {
 
-    pos: Vector
-    naub: Naub
     engine: Matter.Engine
     constraint: Matter.Constraint
     alive = true
 
-    constructor(naub: Naub, pos: Vector) {
-        this.pos = pos
-        this.naub = naub
+    constructor(public naub: Naub, public pos: Vector) {
         this.engine = naub.engine
         this.constraint = Matter.Constraint.create({
             bodyA: naub.body,
