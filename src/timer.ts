@@ -1,21 +1,19 @@
 export class Timer {
-    interval: number
-    callback: () => void
-    active = false
-    time = 0
-    constructor(interval: number, callback: () => void) {
-        this.interval = interval
-        this.callback = callback
+    public active = false
+    public time = 0
+
+    constructor(private interval: number, private callback: () => void) {
     }
-    start() {
+
+    start(): Timer {
         this.active = true
         return this
     }
-    stop() {
+    stop(): Timer {
         this.active = false
         return this
     }
-    step(dt: number) {
+    step(dt: number): Timer {
         if (!this.active) return this
         this.time += dt
         if (this.time >= this.interval) {
