@@ -1,4 +1,4 @@
-import { Naubino, Naub, Hunter, Update, Pointer } from "./naubino"
+import { Naubino, Naub, Update, Pointer } from "./naubino"
 import { ArenaMode } from "./arena-mode"
 import { Vector, Matter } from "./matter-js"
 
