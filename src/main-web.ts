@@ -1,4 +1,5 @@
-import { Naubino, Naub, Hunter, Update, ArenaMode, Pointer } from "./naubino"
+import { Naubino, Naub, Hunter, Update, Pointer } from "./naubino"
+import { ArenaMode } from "./arena-mode"
 import { Vector, Matter } from "./matter-js"
 
 import * as _ from "lodash"
