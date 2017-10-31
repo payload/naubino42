@@ -86,7 +86,7 @@ describe("ArenaMode", function () {
             assert.isAtMost(naubino.naubs.size, max_naubs, `at most ${max_naubs} naubs`)
         })
         it("doesnt spam when spammer disabled", function () {
-            arena_mode.spammer = false
+            arena_mode.doSpam = false
             const before = naubino.naubs.size
             _.times(60 * 10, () => arena_mode.step())
             const after = naubino.naubs.size
