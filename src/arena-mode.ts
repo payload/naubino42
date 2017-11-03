@@ -10,24 +10,22 @@ interface ArenaModeNaub {
 
 export class ArenaMode {
     max_naubs = 80
-    _naubino: Naubino
-    _spammer = new Timer(3, () => this.spam_naub_bunch()).start()
-    spammer = true
+    private spammer = new Timer(3, () => this.spam_naub_bunch()).start()
+    public doSpam = true
     naubMap = new Map<Naub, ArenaModeNaub>()
 
-    constructor(naubino: Naubino) {
+    constructor(private naubino: Naubino) {
         console.assert(naubino)
-        this._naubino = naubino
         naubino.ee.on("naub_removed", this.on_naub_removed, this)
     }
     spam_naub_bunch(): Naub[] {
-        if (this._naubino.naubs.size > this.max_naubs - 2) return
+        if (this.naubino.naubs.size > this.max_naubs - 2) return
         this.spam_naub_pair()
     }
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
         //const rot = 2 * Math.PI * Math.random()
-        const naubs = this._naubino.create_naub_chain(2, pos, Math.random() * 2 * Math.PI)
+        const naubs = this.naubino.create_naub_chain(2, pos, Math.random() * 2 * Math.PI)
         for (const naub of naubs) {
             const constraint = Matter.Constraint.create({
                 bodyA: naub.body,
@@ -36,7 +34,7 @@ export class ArenaMode {
                 stiffness: 0.00001
             })
             constraint.userData = { type: "ArenaMode.CenterJoint" }
-            Matter.World.add(this._naubino.engine.world, constraint)
+            Matter.World.add(this.naubino.engine.world, constraint)
             this.naubMap.set(naub, { CenterJoint: constraint })
             const palette = "red pink green blue purple yellow".split(" ")
             naub.color = _.sample(palette)
@@ -47,12 +45,12 @@ export class ArenaMode {
         const my_naub = this.naubMap.get(naub)
         this.naubMap.delete(naub)
         if (my_naub) {
-            Matter.World.remove(this._naubino.engine.world, my_naub.CenterJoint)
+            Matter.World.remove(this.naubino.engine.world, my_naub.CenterJoint)
         }
     }
     random_naub_pos(): Vector {
         const { sin, cos, max, random, PI } = Math
-        const { x, y } = this._naubino.size
+        const { x, y } = this.naubino.size
         const magic = 20
         const radius = Math.sqrt(x * x + y * y) / 2
         const angle = random() * 2 * PI
@@ -67,10 +65,10 @@ export class ArenaMode {
         }
     }
     center_pos() {
-        return Vector.mult(this._naubino.size, 0.5)
+        return Vector.mult(this.naubino.size, 0.5)
     }
     step() {
-        if (this.spammer) this._spammer.step(1 / 60)
+        if (this.doSpam) this.spammer.step(1 / 60)
     }
 }
 

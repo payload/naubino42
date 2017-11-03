@@ -7,14 +7,16 @@ import { NaubFactory } from "./naub-factory"
 import * as _ from "lodash"
 import { EventEmitter } from "eventemitter3"
 
-class Update {
+export { Pointer, PointerSystem }
+
+export class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
 }
 
 const bodyNaubMap = new Map<number, Naub>();
 
-class Naub {
+export class Naub {
     static id_generator = 0
     static default_radius = 15
 
@@ -162,7 +164,7 @@ class Naub {
 }
 
 
-class NaubJoint {
+export class NaubJoint {
 
     naub_a: Naub
     naub_b: Naub
@@ -255,7 +257,7 @@ interface NaubinoEventEmitter extends EventEmitter {
     ): this;
 }
 
-class Naubino {
+export class Naubino {
     size: Vector = { x: 1, y: 1 }
 
     naubs = new Set<Naub>()
@@ -362,4 +364,3 @@ class Naubino {
     }
 }
 
-export { Naubino, Naub, NaubJoint, Pointer, Update, PointerSystem }
