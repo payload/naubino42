@@ -1,5 +1,5 @@
 module.exports = {
-    entry: "./src/main-web.ts",
+    entry: "./src/main-react.tsx",
     output: {
         filename: "index.js",
         path: __dirname + "/dist"
@@ -8,7 +8,9 @@ module.exports = {
     resolve: {
         extensions: [
             ".ts",
-            ".json"
+            ".tsx",
+            ".js",
+            ".jsx"
         ]
     },
     module: {

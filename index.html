@@ -3,21 +3,36 @@
 
 <head>
     <meta charset="UTF-8">
-    <xmeta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-        <title>Naubino42</title>
-        <style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Naubino42</title>
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
+    <style>
         body {
             padding: 0;
             margin: 0;
             overflow: hidden;
         }
-        </style>
+        #menu {
+            position: relative;
+            
+            font-family: 'Comfortaa', sans-serif;
+        
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #naubino42 {
+            position: fixed;
+            top: 0;
+        }
+    </style>
 </head>
 
 <body>
     <canvas id="naubino42" width="600" height="400" touch-action="none"></canvas>
+    <div id="menu"></div>
     <script defer src="dist/index.js"></script>
 </body>
 

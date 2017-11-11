@@ -5,10 +5,14 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@types/react": "^16.0.22",
+    "@types/react-dom": "^16.0.3",
     "eventemitter3": "^2.0.3",
     "lodash": "*",
     "matter-js": "https://github.com/payload/matter-js.git",
     "pepjs": "^0.4.3",
+    "react": "^16.1.0",
+    "react-dom": "^16.1.0",
     "watchify": "*"
   },
   "devDependencies": {
