@@ -8,6 +8,7 @@
     "@types/react": "^16.0.22",
     "@types/react-dom": "^16.0.3",
     "eventemitter3": "^2.0.3",
+    "firebase": "4.6.0",
     "lodash": "*",
     "matter-js": "https://github.com/payload/matter-js.git",
     "pepjs": "^0.4.3",
