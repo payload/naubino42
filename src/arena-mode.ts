@@ -8,8 +8,10 @@ interface ArenaModeNaub {
     CenterJoint: Matter.Constraint
 }
 
+
 export class ArenaMode {
-    max_naubs = 80
+    min_naubs = 0
+    max_naubs = -1
     private spammer = new Timer(3, () => this.spam_naub_bunch()).start()
     public doSpam = true
     naubMap = new Map<Naub, ArenaModeNaub>()
@@ -18,9 +20,11 @@ export class ArenaMode {
         console.assert(naubino)
         naubino.ee.on("naub_removed", this.on_naub_removed, this)
     }
-    spam_naub_bunch(): Naub[] {
-        if (this.naubino.naubs.size > this.max_naubs - 2) return
-        this.spam_naub_pair()
+    spam_naub_bunch() {
+        if (this.max_naubs >= 0 && this.naubino.naubs.size + 2 > this.max_naubs) return
+        do {
+            this.spam_naub_pair()
+        } while (this.naubino.naubs.size < this.min_naubs)
     }
     spam_naub_pair(): Naub[] {
         const pos = this.random_naub_pos()
@@ -51,12 +55,11 @@ export class ArenaMode {
     random_naub_pos(): Vector {
         const { sin, cos, max, random, PI } = Math
         const { x, y } = this.naubino.size
-        const magic = 20
-        const radius = Math.sqrt(x * x + y * y) / 2
+        const radius = Math.sqrt(x * x + y * y) / 2 + Naub.default_radius * 2
         const angle = random() * 2 * PI
         return {
-            x: (cos(angle) * (radius + magic) + x / 2),
-            y: (sin(angle) * (radius + magic) + y / 2)
+            x: (cos(angle) * radius + x / 2),
+            y: (sin(angle) * radius + y / 2)
         }
     }
     set_center_pos() {
@@ -68,7 +71,11 @@ export class ArenaMode {
         return Vector.mult(this.naubino.size, 0.5)
     }
     step() {
-        if (this.doSpam) this.spammer.step(1 / 60)
+        if (this.doSpam) {
+            this.spammer.step(1 / 60)
+            const i = this.spammer.interval
+            this.spammer.interval = i - ((i - 0.5) / 1200)
+        }
     }
 }
 
