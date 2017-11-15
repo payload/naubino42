@@ -2,7 +2,7 @@ export class Timer {
     public active = false
     public time = 0
 
-    constructor(private interval: number, private callback: () => void) {
+    constructor(public interval: number, private callback: () => void) {
     }
 
     start(): Timer {
