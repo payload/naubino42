@@ -92,5 +92,23 @@ describe("ArenaMode", function () {
             const after = naubino.naubs.size
             assert.equal(after, before, "no more naubs than before")
         })
+        it("spams naubs faster over time", function () {
+            const period = 60 * 13
+            assert.equal(naubino.naubs.size, 0, "no naub at beginning")
+
+            _.times(period, () => arena_mode.step())
+            const naubs1 = naubino.naubs.size
+            _.times(period, () => arena_mode.step())
+            const naubs2 = naubino.naubs.size
+            _.times(period, () => arena_mode.step())
+            const naubs3 = naubino.naubs.size
+            _.times(period, () => arena_mode.step())
+            const total_naubs = naubino.naubs.size
+
+            assert.isAbove(naubs1, 0, "more naubs 1")
+            assert.isAbove(naubs2, naubs1, "more naubs 2")
+            assert.isAbove(naubs3 - naubs2, naubs2 - naubs1, "naubs come faster and faster")
+            assert.isAbove(total_naubs / 2, naubs2, "more naubs come in second half than in first half")
+        })
     })
 })
