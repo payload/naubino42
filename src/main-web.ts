@@ -33,13 +33,13 @@ console.error = (...args: any[]) => {
 
 
 
-addEventListener("click", function() {
+addEventListener("click", function () {
     var el: any = document.documentElement,
-      rfs = el.requestFullscreen
-        || el.webkitRequestFullScreen
-        || el.mozRequestFullScreen
-        || el.msRequestFullscreen
-    ;
+        rfs = el.requestFullscreen
+            || el.webkitRequestFullScreen
+            || el.mozRequestFullScreen
+            || el.msRequestFullscreen
+        ;
     rfs.call(el);
 });
 
@@ -79,7 +79,7 @@ const pointerHistoryMap = new Map<number, Vector[]>()
 const pointerNaubinoMap = new Map<number, Pointer>()
 
 function pointer_naubino_touch_down(ev: PointerEvent, pos: Vector) {
-    const naubino = (<any> window).Game.naubino;
+    const naubino = (<any>window).Game.naubino;
     const pointer = naubino.touch_down(pos)
     if (pointer) {
         pointerNaubinoMap.set(ev.pointerId, pointer)
@@ -125,13 +125,23 @@ function render_pointer_history(ctx: CanvasRenderingContext2D) {
 
 
 
-
-
-
 export class Game {
     private naubino = new Naubino()
     private gameMode = new ArenaMode(this.naubino)
     private playing = false
+
+    private render_score_config = {
+        x: 60,
+        y: 60,
+        r: 1,
+        l: -25,
+        t: -25,
+        w: 50,
+        h: 50,
+        tx: -8,
+        ty: 11,
+        font: "30px bold Comfortaa,sans-serif"
+    }
 
     constructor() {
         this.naubino.size = { x: 600, y: 400 }
@@ -218,7 +228,7 @@ export class Game {
 
         ctx.save()
         for (const naub of update.naubs) {
-            const color = "rgb("+palette.get(naub.color).join(",")+")"
+            const color = this.get_color(naub.color)
             ctx.fillStyle = color
             ctx.beginPath()
             ctx.arc(naub.pos.x, naub.pos.y, naub.radius, 0, Math.PI * 2)
@@ -241,7 +251,32 @@ export class Game {
         this.render_debug_matter_query(ctx)
         ctx.restore()
 
+        ctx.save()
+        this.render_score(ctx, update)
         ctx.restore()
+
+        ctx.restore()
+    }
+
+    get_color(name: string): string {
+        return "rgb(" + palette.get(name).join(",") + ")"
+    }
+
+    render_score(ctx: CanvasRenderingContext2D, update: Update) {
+        const text = `${Math.floor(update.score)}`
+        const { x, y, r, l, t, w, h, tx, ty, font } = this.render_score_config
+
+        ctx.fillStyle = this.get_color("yellow")
+        ctx.translate(x, y)
+
+        ctx.save()
+        ctx.rotate(r)
+        ctx.fillRect(l, t, w, h)
+        ctx.restore()
+
+        ctx.fillStyle = "black"
+        ctx.font = font
+        ctx.fillText(text, tx, ty)
     }
 
     render_debug_matter_query(ctx: CanvasRenderingContext2D) {
