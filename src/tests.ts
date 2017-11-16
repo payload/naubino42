@@ -169,6 +169,19 @@ describe("Naubino", () => {
             _.times(100, () => naubino.step())
             assert.equal(naubino.naubs.size, 4, "no naub merged")
         })
+        it("merge naub transfers pointers to remaining naub", function () {
+            const [naub_a, _a] = naubino.create_naub_chain(2, { x: 0, y: 0 })
+            const [naub_b, _b] = naubino.create_naub_chain(2, { x: 0, y: naub_a.radius * 3 })
+            const pointer_a = naubino.connect_pointer_naub(naub_a)
+            const pointer_b = naubino.connect_pointer_naub(naub_b)
+            pointer_a.moveTo(naub_b.pos)
+            pointer_b.moveTo(naub_a.pos)
+            _.times(100, () => naubino.step())
+            assert.isFalse(naub_a.alive && naub_b.alive, "naubs merged")
+            const remaining_naub = naub_a.alive ? naub_a : naub_b
+            assert.isTrue(remaining_naub.pointers.has(pointer_a), "pointer_a transfered")
+            assert.isTrue(remaining_naub.pointers.has(pointer_b), "pointer_b transfered")
+        })
     })
 
     describe("create_naub_chain", function () {

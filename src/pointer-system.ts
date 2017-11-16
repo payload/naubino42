@@ -77,6 +77,13 @@ export class Pointer {
         this.naub.pointers.add(this)
     }
 
+    transfer(other_naub: Naub) {
+        this.naub.pointers.delete(this)
+        this.naub = other_naub
+        this.constraint.bodyA = other_naub.body
+        other_naub.pointers.add(this)
+    }
+
     remove() {
         this.alive = false
         Matter.World.remove(this.engine.world, this.constraint)

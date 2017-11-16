@@ -72,6 +72,9 @@ export class Naub {
             const joint = this.join_naub(joined_naub)
             joints.push(joint)
         }
+        for (const pointer of other.pointers) {
+            pointer.transfer(this)
+        }
         other.remove()
         return joints
     }
