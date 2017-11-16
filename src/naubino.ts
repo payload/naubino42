@@ -12,6 +12,7 @@ export { Pointer, PointerSystem }
 export class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
+    score: number
 }
 
 const bodyNaubMap = new Map<number, Naub>();
@@ -204,6 +205,7 @@ class NaubColliderSystem {
 
     naubino: Naubino
     ee = new EventEmitter()
+    score = 0
 
     constructor(naubino: Naubino, engine: Matter.Engine) {
         this.naubino = naubino
@@ -239,6 +241,7 @@ class NaubColliderSystem {
         const cycles = naub_a.find_cycles()
         for (const cycle of cycles) {
             this.pop_cycle(cycle)
+            this.score += cycle.length * 1.25
         }
     }
 
@@ -354,9 +357,10 @@ export class Naubino {
         if (this.world_is_exploding()) {
             console.warn("WARN world is exploding")
         }
-        return <Update>{
+        return {
             naubs: this.naubs,
-            naub_joints: this.naub_joints
+            naub_joints: this.naub_joints,
+            score: this.collider.score,
         }
     }
 
