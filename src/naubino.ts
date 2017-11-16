@@ -13,6 +13,7 @@ export class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
     score: number
+    game_over: boolean
 }
 
 const bodyNaubMap = new Map<number, Naub>();
@@ -371,6 +372,7 @@ export class Naubino {
             naubs: this.naubs,
             naub_joints: this.naub_joints,
             score: this.collider.score,
+            game_over: this.game_over,
         }
     }
 

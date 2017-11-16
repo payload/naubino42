@@ -79,7 +79,8 @@ const pointerHistoryMap = new Map<number, Vector[]>()
 const pointerNaubinoMap = new Map<number, Pointer>()
 
 function pointer_naubino_touch_down(ev: PointerEvent, pos: Vector) {
-    const naubino = (<any>window).Game.naubino;
+    const naubino = (<any>window).Game.naubino
+    if (naubino.game_over) return
     const pointer = naubino.touch_down(pos)
     if (pointer) {
         pointerNaubinoMap.set(ev.pointerId, pointer)
@@ -259,11 +260,39 @@ export class Game {
         this.render_score(ctx, update)
         ctx.restore()
 
+        ctx.save()
+        if (update.game_over) {
+            this.render_game_over(ctx, update)
+        }
+        ctx.restore()
+
         ctx.restore()
     }
 
     get_color(name: string): string {
         return "rgb(" + palette.get(name).join(",") + ")"
+    }
+
+    render_game_over(ctx: CanvasRenderingContext2D, update: Update) {
+        const text1 = `game over`
+        const text2 = `popped ${Math.floor(update.score)} naubs`
+        const text3 = "hit ENTER to restart game"
+
+        ctx.fillStyle = "black"
+        ctx.textAlign = "center"
+        ctx.font = "48px bold Comfortaa,sans-serif"
+        ctx.translate(canvas.width / 2, canvas.height / 2)
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 10
+        ctx.strokeText(text1, 0, -48)
+        ctx.fillText(text1, 0, -48)
+        ctx.strokeText(text2, 0, 48)
+        ctx.fillText(text2, 0, 48)
+
+        ctx.lineWidth = 5
+        ctx.font = "16px bold Comfortaa,sans-serif"
+        ctx.strokeText(text3, 0, 96)
+        ctx.fillText(text3, 0, 96)
     }
 
     render_arena(ctx: CanvasRenderingContext2D, mode: ArenaMode) {
