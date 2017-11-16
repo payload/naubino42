@@ -1,4 +1,4 @@
-import { fail_condition } from "./utils"
+import { fail_condition, delegate_event } from "./utils"
 import { Timer } from "./timer"
 import { Vector, Matter } from "./matter-js"
 import { PointerSystem, Pointer } from "./pointer-system"
@@ -13,6 +13,7 @@ export class Update {
     naubs: Set<Naub>
     naub_joints: Set<NaubJoint>
     score: number
+    game_over: boolean
 }
 
 const bodyNaubMap = new Map<number, Naub>();
@@ -214,6 +215,15 @@ class NaubColliderSystem {
 
     on_collision_start({ name, pairs, source, timestamp }: Matter.IEventCollision<Matter.Engine>) {
         for (const pair of pairs) {
+            const label_a = pair.bodyA.label
+            const label_b = pair.bodyB.label
+            if (label_a) {
+                this.ee.emit(label_a, label_a, label_b, pair)
+            }
+            if (label_b && label_b != label_a) {
+                this.ee.emit(label_b, label_b, label_a, pair)
+            }
+
             const naub_a = bodyNaubMap.get(pair.bodyA.id)
             const naub_b = bodyNaubMap.get(pair.bodyB.id)
             if (naub_a && naub_b) {
@@ -275,12 +285,13 @@ export class Naubino {
     naub_fac = new NaubFactory(this)
     ee: NaubinoEventEmitter = new EventEmitter()
     debug_matter_queries = new Array<Matter.Vertices>()
+    game_over = false
 
     constructor() {
         this.engine.world.gravity.x = 0
         this.engine.world.gravity.y = 0
-        this.collider.ee.on("naub_naub_collision", (...args) => this.ee.emit("naub_naub_collision", ...args))
-        this.collider.ee.on("join_naubs", (...args) => this.ee.emit("join_naubs", ...args))
+        delegate_event("naub_naub_collision", this.collider.ee, this.ee)
+        delegate_event("join_naubs", this.collider.ee, this.ee)
     }
 
     create_naub(pos?: Vector) {
@@ -361,6 +372,7 @@ export class Naubino {
             naubs: this.naubs,
             naub_joints: this.naub_joints,
             score: this.collider.score,
+            game_over: this.game_over,
         }
     }
 

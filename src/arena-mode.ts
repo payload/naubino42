@@ -15,10 +15,40 @@ export class ArenaMode {
     private spammer = new Timer(3, () => this.spam_naub_bunch()).start()
     public doSpam = true
     naubMap = new Map<Naub, ArenaModeNaub>()
+    arena = { x: 0, y: 0, radius: 100 }
+    private arena_body: Matter.Body
 
     constructor(private naubino: Naubino) {
         console.assert(naubino)
         naubino.ee.on("naub_removed", this.on_naub_removed, this)
+
+        this.arena_body = Matter.Bodies.circle(
+            this.arena.x,
+            this.arena.y,
+            this.arena.radius,
+            {
+                label: "arena.sensor",
+                isSensor: true,
+            }
+        )
+        Matter.World.add(this.naubino.engine.world, this.arena_body)
+        naubino.collider.ee.on(
+            this.arena_body.label,
+            (label_a, label_b, pair) => this.on_arena_sensor(label_a, label_b, pair)
+        )
+    }
+    on_arena_sensor(label_a: string, label_b: string, pair: Matter.IPair) {
+        let naubs = 0
+        const center = { x: this.arena.x, y: this.arena.y }
+        for (const naub of this.naubino.naubs) {
+            const d = Vector.distance(center, { x: naub.pos.x, y: naub.pos.y })
+            if (d < this.arena.radius) {
+                naubs++;
+            }
+        }
+        if (naubs > 100) {
+            this.naubino.game_over = true
+        }
     }
     spam_naub_bunch() {
         if (this.max_naubs >= 0 && this.naubino.naubs.size + 2 > this.max_naubs) return
@@ -66,6 +96,17 @@ export class ArenaMode {
         for (const my_naub of this.naubMap.values()) {
             my_naub.CenterJoint.pointB = this.center_pos()
         }
+
+        const { x, y } = this.naubino.size
+        const d = Math.min(x, y)
+        this.arena = {
+            x: x / 2,
+            y: y / 2,
+            radius: 0.5 * Math.sqrt(d * d / 4)
+        }
+        Matter.Body.setPosition(this.arena_body, { x: this.arena.x, y: this.arena.y })
+        // there is no easier way to generate circle vertices for Matter
+        Matter.Body.setVertices(this.arena_body, Matter.Bodies.circle(0, 0, this.arena.radius).vertices)
     }
     center_pos() {
         return Vector.mult(this.naubino.size, 0.5)
