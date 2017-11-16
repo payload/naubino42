@@ -27,10 +27,28 @@ export class ArenaMode {
             this.arena.y,
             this.arena.radius,
             {
+                label: "arena.sensor",
                 isSensor: true,
             }
         )
         Matter.World.add(this.naubino.engine.world, this.arena_body)
+        naubino.collider.ee.on(
+            this.arena_body.label,
+            (label_a, label_b, pair) => this.on_arena_sensor(label_a, label_b, pair)
+        )
+    }
+    on_arena_sensor(label_a: string, label_b: string, pair: Matter.IPair) {
+        let naubs = 0
+        const center = { x: this.arena.x, y: this.arena.y }
+        for (const naub of this.naubino.naubs) {
+            const d = Vector.distance(center, { x: naub.pos.x, y: naub.pos.y })
+            if (d < this.arena.radius) {
+                naubs++;
+            }
+        }
+        if (naubs > 100) {
+            this.naubino.game_over = true
+        }
     }
     spam_naub_bunch() {
         if (this.max_naubs >= 0 && this.naubino.naubs.size + 2 > this.max_naubs) return

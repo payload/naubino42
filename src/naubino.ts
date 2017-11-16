@@ -214,6 +214,15 @@ class NaubColliderSystem {
 
     on_collision_start({ name, pairs, source, timestamp }: Matter.IEventCollision<Matter.Engine>) {
         for (const pair of pairs) {
+            const label_a = pair.bodyA.label
+            const label_b = pair.bodyB.label
+            if (label_a) {
+                this.ee.emit(label_a, label_a, label_b, pair)
+            }
+            if (label_b && label_b != label_a) {
+                this.ee.emit(label_b, label_b, label_a, pair)
+            }
+
             const naub_a = bodyNaubMap.get(pair.bodyA.id)
             const naub_b = bodyNaubMap.get(pair.bodyB.id)
             if (naub_a && naub_b) {
@@ -275,6 +284,7 @@ export class Naubino {
     naub_fac = new NaubFactory(this)
     ee: NaubinoEventEmitter = new EventEmitter()
     debug_matter_queries = new Array<Matter.Vertices>()
+    game_over = false
 
     constructor() {
         this.engine.world.gravity.x = 0
