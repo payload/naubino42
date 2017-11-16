@@ -192,9 +192,18 @@ export class Game {
 
         window.addEventListener("keypress", (ev) => {
             if (ev.key == " ") this.gameMode.spam_naub_pair()
-        })
-        window.addEventListener("keypress", (ev) => {
             if (ev.key == "s") this.gameMode.doSpam = !this.gameMode.doSpam
+            if (ev.key == "p") {
+                if (this.playing) this.pause()
+                else this.start()
+            }
+            if (ev.key == "Enter") {
+                if (this.naubino.game_over) {
+                    this.naubino = new Naubino()
+                    this.gameMode = new ArenaMode(this.naubino)
+                    this.resize()
+                }
+            }
         })
     }
 
