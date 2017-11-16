@@ -1,4 +1,4 @@
-import { fail_condition } from "./utils"
+import { fail_condition, delegate_event } from "./utils"
 import { Timer } from "./timer"
 import { Vector, Matter } from "./matter-js"
 import { PointerSystem, Pointer } from "./pointer-system"
@@ -279,8 +279,8 @@ export class Naubino {
     constructor() {
         this.engine.world.gravity.x = 0
         this.engine.world.gravity.y = 0
-        this.collider.ee.on("naub_naub_collision", (...args) => this.ee.emit("naub_naub_collision", ...args))
-        this.collider.ee.on("join_naubs", (...args) => this.ee.emit("join_naubs", ...args))
+        delegate_event("naub_naub_collision", this.collider.ee, this.ee)
+        delegate_event("join_naubs", this.collider.ee, this.ee)
     }
 
     create_naub(pos?: Vector) {
