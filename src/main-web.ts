@@ -213,6 +213,10 @@ export class Game {
         }
 
         ctx.save()
+        this.render_arena(ctx, this.gameMode)
+        ctx.restore()
+
+        ctx.save()
         ctx.strokeStyle = "black"
         for (const joint of update.naub_joints) {
             const { x: xa, y: ya } = joint.naub_a.pos
@@ -240,7 +244,7 @@ export class Game {
         const world = this.naubino.engine.world
 
         ctx.save()
-        //render_matter()
+        //this.render_matter(ctx)
         ctx.restore()
 
         ctx.save()
@@ -260,6 +264,15 @@ export class Game {
 
     get_color(name: string): string {
         return "rgb(" + palette.get(name).join(",") + ")"
+    }
+
+    render_arena(ctx: CanvasRenderingContext2D, mode: ArenaMode) {
+        const { x, y, radius } = mode.arena
+        ctx.strokeStyle = "#cecece"
+        ctx.lineWidth = 3
+        ctx.moveTo(x + radius, y)
+        ctx.arc(x, y, radius, 0, Math.PI * 2)
+        ctx.stroke()
     }
 
     render_score(ctx: CanvasRenderingContext2D, update: Update) {
