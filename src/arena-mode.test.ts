@@ -110,5 +110,16 @@ describe("ArenaMode", function () {
             assert.isAbove(naubs3 - naubs2, naubs2 - naubs1, "naubs come faster and faster")
             assert.isAbove(total_naubs / 2, naubs2, "more naubs come in second half than in first half")
         })
+        it("game over when there are too many naubs", function () {
+            arena_mode.naubs_until_game_over = 10
+            assert.isFalse(naubino.game_over, "precondition: game over is false")
+
+            for (let i = 60 * 60; i > 0 && !naubino.game_over; i--) {
+                naubino.step()
+                arena_mode.step()
+            }
+            
+            assert.isTrue(naubino.game_over, `game over`)
+        })
     })
 })

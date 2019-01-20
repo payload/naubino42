@@ -17,6 +17,7 @@ export class ArenaMode {
     naubMap = new Map<Naub, ArenaModeNaub>()
     arena = { x: 0, y: 0, radius: 100 }
     private arena_body: Matter.Body
+    naubs_until_game_over = 100;
 
     constructor(private naubino: Naubino) {
         console.assert(naubino)
@@ -46,7 +47,7 @@ export class ArenaMode {
                 naubs++;
             }
         }
-        if (naubs > 100) {
+        if (naubs >= this.naubs_until_game_over) {
             this.naubino.game_over = true
         }
     }
